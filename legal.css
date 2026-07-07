@@ -1,0 +1,312 @@
+/* ===== TeoMaks GmbH – Rechtliche Seiten (Impressum, Datenschutz, AGB) =====
+   Eigenes Stylesheet für die statischen Rechtsseiten. Es ergänzt styles.css
+   und übernimmt die für Kopf-/Fusszeile relevanten Regeln, die auf der
+   Startseite bisher nur als Inline-<style> (V36–V41) existierten, damit
+   Header, Hamburger-Menü und Footer auf allen Seiten identisch aussehen.
+   Zusätzlich definiert es die Typografie der Rechtsseiten im bestehenden
+   Marken-Look (Navy #07111f / Orange #ff8a00). */
+
+/* ---------- Header / Sticky Topbar / Hamburger (aus V36) ---------- */
+html body .topbar{
+  position:sticky !important;
+  top:0 !important;
+  z-index:9999 !important;
+  overflow:visible !important;
+}
+html body .menu-toggle{
+  display:none !important;
+  width:48px !important;
+  height:42px !important;
+  border:1px solid rgba(11,45,92,.24) !important;
+  border-radius:14px !important;
+  background:#fff !important;
+  align-items:center !important;
+  justify-content:center !important;
+  flex-direction:column !important;
+  gap:5px !important;
+  cursor:pointer !important;
+  z-index:10001 !important;
+  box-shadow:0 8px 20px rgba(7,17,31,.10) !important;
+}
+html body .menu-toggle span{
+  display:block !important;
+  width:24px !important;
+  height:2px !important;
+  border-radius:999px !important;
+  background:#0B2D5C !important;
+  transition:transform .2s ease, opacity .2s ease !important;
+}
+html body .menu-toggle.is-open span:nth-child(1){ transform:translateY(7px) rotate(45deg) !important; }
+html body .menu-toggle.is-open span:nth-child(2){ opacity:0 !important; }
+html body .menu-toggle.is-open span:nth-child(3){ transform:translateY(-7px) rotate(-45deg) !important; }
+
+@media(max-width:760px){
+  html body .topbar{
+    height:52px !important;
+    min-height:52px !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:space-between !important;
+    padding:0 16px !important;
+    background:rgba(255,255,255,.97) !important;
+  }
+  html body .menu-toggle{ display:flex !important; }
+  html body #siteNav{
+    display:none !important;
+    position:absolute !important;
+    top:58px !important;
+    left:16px !important;
+    right:16px !important;
+    flex-direction:column !important;
+    align-items:stretch !important;
+    gap:0 !important;
+    padding:10px !important;
+    border-radius:20px !important;
+    background:#fff !important;
+    border:1px solid rgba(219,226,234,.95) !important;
+    box-shadow:0 24px 65px rgba(7,17,31,.22) !important;
+    z-index:10000 !important;
+  }
+  html body #siteNav.is-open{ display:flex !important; }
+  html body #siteNav a{
+    display:block !important;
+    width:100% !important;
+    padding:14px 15px !important;
+    border-radius:12px !important;
+    color:#0B2D5C !important;
+    font-size:17px !important;
+    font-weight:850 !important;
+    text-decoration:none !important;
+    text-transform:uppercase !important;
+    letter-spacing:.055em !important;
+    box-sizing:border-box !important;
+  }
+}
+
+/* Brand-Logo in der Topbar (auf Rechtsseiten gibt es keinen Hero) */
+html body .topbar .brand img{ height:60px !important; width:auto !important; display:block !important; }
+@media(max-width:760px){ html body .topbar .brand img{ height:42px !important; } }
+
+/* ---------- Footer (aus V36/V37/V38/V39/V41) ---------- */
+html body footer.site-footer.v36-footer{
+  background:linear-gradient(135deg,#f4f6f8 0%,#cdd2d7 26%,#eef0f2 50%,#bcc2c8 74%,#dfe2e5 100%) !important;
+  border-top:3px solid var(--orange) !important;
+  padding:14px 16px !important;
+  min-height:auto !important;
+  height:auto !important;
+  color:#1d2733 !important;
+}
+html body .v36-footer-inner{
+  max-width:980px !important;
+  margin:0 auto !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:28px !important;
+}
+html body .v36-footer .footer-logo-wrap,
+html body .site-footer .footer-logo-wrap{
+  margin:0 !important;
+  padding:0 !important;
+  line-height:0 !important;
+  background:transparent !important;
+  border:0 !important;
+  border-radius:0 !important;
+  min-width:0 !important;
+  box-shadow:none !important;
+}
+html body .v36-footer img.footer-logo-same,
+html body .site-footer img.footer-logo-same{
+  display:block !important;
+  width:300px !important;
+  max-width:300px !important;
+  height:auto !important;
+  margin:0 !important;
+  filter:none !important;
+  background:transparent !important;
+  opacity:1 !important;
+}
+html body .v36-footer .footer-text{
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  text-align:center !important;
+  gap:5px !important;
+}
+html body .v36-footer .footer-text strong,
+html body .site-footer .footer-text strong{ color:#13202e !important; font-size:1rem !important; }
+html body .v36-footer .footer-services,
+html body .site-footer .footer-services{
+  color:#33414f !important;
+  white-space:nowrap !important;
+  font-size:.78rem !important;
+}
+html body .v36-footer .footer-contact-line{
+  display:flex !important;
+  flex-direction:row !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:9px !important;
+  flex-wrap:wrap !important;
+  margin-top:3px !important;
+}
+html body .v36-footer .footer-contact-line a,
+html body .v36-footer .footer-contact-line span,
+html body .site-footer .footer-contact-line a,
+html body .site-footer .footer-contact-line span{
+  color:#13283f !important;
+  font-size:.82rem !important;
+}
+
+@media(max-width:760px){
+  html body .v36-footer-inner{ flex-direction:column !important; gap:10px !important; }
+  html body .v36-footer img.footer-logo-same,
+  html body .site-footer img.footer-logo-same{ width:240px !important; max-width:72vw !important; }
+  html body .v36-footer .footer-services{ white-space:normal !important; max-width:330px !important; }
+}
+
+/* ---------- CTA-Button (aus V41/V42) ---------- */
+.legal-page .btn.primary{
+  background:linear-gradient(180deg,#ffa733 0%,#ff8a00 52%,#f57f00 100%) !important;
+  color:#1b1203 !important;
+  box-shadow:0 14px 30px -8px rgba(255,138,0,.55), inset 0 1px 0 rgba(255,255,255,.55) !important;
+}
+.legal-page .btn.primary:hover{
+  transform:translateY(-2px) !important;
+  box-shadow:0 22px 42px -10px rgba(255,138,0,.68), inset 0 1px 0 rgba(255,255,255,.6) !important;
+}
+
+/* =================================================================
+   Rechtsseiten-Typografie
+   ================================================================= */
+.legal-page{ background:var(--paper); }
+
+/* Kopfband im Stil der hellen Sektionen der Startseite */
+.legal-hero{
+  background:
+    radial-gradient(circle at 86% 16%, rgba(255,138,0,.10), transparent 40%),
+    linear-gradient(180deg,#f8fafb,#eef3f4);
+  border-bottom:1px solid var(--line);
+  padding:64px 7vw 40px;
+}
+.legal-hero .kicker{
+  display:block;
+  text-transform:uppercase;
+  letter-spacing:.18em;
+  font-size:12px;
+  font-weight:900;
+  color:var(--orange);
+  margin-bottom:12px;
+}
+.legal-hero h1{
+  font-size:clamp(30px,3.4vw,48px);
+  line-height:1.05;
+  letter-spacing:-.03em;
+  color:#13202e;
+  margin:0;
+  max-width:18ch;
+}
+.legal-hero .legal-lead{
+  margin:16px 0 0;
+  max-width:60ch;
+  color:#4a5563;
+  font-size:clamp(15px,1.2vw,18px);
+  line-height:1.6;
+}
+
+/* Inhaltscontainer */
+.legal-wrap{
+  max-width:880px;
+  margin:0 auto;
+  padding:48px 7vw 88px;
+}
+.legal-content section{ margin:0 0 30px; }
+.legal-content h2{
+  font-size:clamp(19px,1.8vw,24px);
+  line-height:1.25;
+  letter-spacing:-.015em;
+  color:var(--navy);
+  margin:36px 0 12px;
+  padding-top:6px;
+}
+.legal-content h2:first-of-type{ margin-top:0; }
+.legal-content h2 .legal-num{ color:var(--orange); font-weight:900; margin-right:.5ch; }
+.legal-content h3{
+  font-size:16px;
+  color:#1f2a3a;
+  margin:20px 0 6px;
+  font-weight:800;
+}
+.legal-content p,
+.legal-content li{
+  color:#3a4453;
+  line-height:1.72;
+  font-size:15.5px;
+}
+.legal-content p{ margin:0 0 12px; }
+.legal-content ul{ margin:0 0 14px; padding-left:1.25rem; }
+.legal-content li{ margin:0 0 6px; }
+.legal-content a{ color:#b85a00; text-decoration:underline; text-underline-offset:2px; }
+.legal-content a:hover{ color:var(--orange); }
+.legal-content strong{ color:#1f2a3a; }
+
+/* "Stand" / Datumzeile */
+.legal-meta{
+  display:inline-block;
+  margin:0 0 28px;
+  padding:7px 14px;
+  border-radius:999px;
+  background:#eef3f6;
+  border:1px solid var(--line);
+  color:#566273;
+  font-size:13px;
+  font-weight:700;
+}
+
+/* Kontakt-/Datenkarte (z. B. verantwortliche Stelle) */
+.legal-card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:22px 24px;
+  box-shadow:0 18px 45px rgba(25,45,70,.06);
+  margin:6px 0 16px;
+}
+.legal-card p{ margin:0 0 4px; }
+
+/* Platzhalter – noch vom Inhaber zu ergänzende Angaben deutlich markieren */
+.legal-ph{
+  background:rgba(255,138,0,.16);
+  border-bottom:1px dashed rgba(184,90,0,.6);
+  border-radius:3px;
+  padding:0 4px;
+  color:#8a4300;
+  font-weight:700;
+  font-style:normal;
+}
+
+/* Zurück-Link */
+.legal-back{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  margin-top:8px;
+  font-weight:800;
+  font-size:14px;
+  color:var(--navy);
+  text-decoration:none;
+}
+.legal-back:hover{ color:var(--orange); }
+
+/* Sprachumschaltung der Inhaltsblöcke.
+   Progressive Enhancement: ohne JavaScript werden beide Sprachblöcke
+   angezeigt (Inhalt bleibt zugänglich); mit JavaScript (html.js) zeigt
+   die Seite nur den aktiven Block. */
+.lang-block{ display:block; }
+.js .lang-block{ display:none; }
+.js .lang-block.is-active{ display:block; }
+
+@media(max-width:760px){
+  .legal-hero{ padding:44px 7vw 30px; }
+  .legal-wrap{ padding:34px 7vw 64px; }
+}

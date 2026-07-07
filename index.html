@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TeoMaks GmbH | Industrieservice · Wartung · Instandhaltung · Montage</title>
+  <meta name="description" content="TeoMaks GmbH bietet Montage, Wartung, Reparaturen und technische Serviceeinsätze für Industrieanlagen, Industrieanlagen und Produktionssysteme." />
+  <link rel="stylesheet" href="styles.css" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" />
+
+
+
+
+
+
+
+<style id="v36-hardfix">
+/* V36 ONLY: hamburger + footer logo. Hero untouched. */
+
+html body .topbar{
+  position:sticky !important;
+  top:0 !important;
+  z-index:9999 !important;
+  overflow:visible !important;
+}
+
+html body .menu-toggle{
+  display:none !important;
+  width:48px !important;
+  height:42px !important;
+  border:1px solid rgba(11,45,92,.24) !important;
+  border-radius:14px !important;
+  background:#fff !important;
+  align-items:center !important;
+  justify-content:center !important;
+  flex-direction:column !important;
+  gap:5px !important;
+  cursor:pointer !important;
+  z-index:10001 !important;
+  box-shadow:0 8px 20px rgba(7,17,31,.10) !important;
+}
+
+html body .menu-toggle span{
+  display:block !important;
+  width:24px !important;
+  height:2px !important;
+  border-radius:999px !important;
+  background:#0B2D5C !important;
+  transition:transform .2s ease, opacity .2s ease !important;
+}
+
+html body .menu-toggle.is-open span:nth-child(1){
+  transform:translateY(7px) rotate(45deg) !important;
+}
+
+html body .menu-toggle.is-open span:nth-child(2){
+  opacity:0 !important;
+}
+
+html body .menu-toggle.is-open span:nth-child(3){
+  transform:translateY(-7px) rotate(-45deg) !important;
+}
+
+@media(max-width:760px){
+  html body .topbar{
+    height:52px !important;
+    min-height:52px !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:flex-end !important;
+    padding:0 16px !important;
+    background:rgba(255,255,255,.97) !important;
+  }
+
+  html body .menu-toggle{
+    display:flex !important;
+  }
+
+  html body #siteNav{
+    display:none !important;
+    position:absolute !important;
+    top:58px !important;
+    left:16px !important;
+    right:16px !important;
+    flex-direction:column !important;
+    align-items:stretch !important;
+    gap:0 !important;
+    padding:10px !important;
+    border-radius:20px !important;
+    background:#fff !important;
+    border:1px solid rgba(219,226,234,.95) !important;
+    box-shadow:0 24px 65px rgba(7,17,31,.22) !important;
+    z-index:10000 !important;
+  }
+
+  html body #siteNav.is-open{
+    display:flex !important;
+  }
+
+  html body #siteNav a{
+    display:block !important;
+    width:100% !important;
+    padding:14px 15px !important;
+    border-radius:12px !important;
+    color:#0B2D5C !important;
+    font-size:17px !important;
+    font-weight:850 !important;
+    text-decoration:none !important;
+    text-transform:uppercase !important;
+    letter-spacing:.055em !important;
+    box-sizing:border-box !important;
+  }
+}
+
+/* footer: use same hero logo and make visible */
+html body footer.site-footer.v36-footer{
+  background:#07111f !important;
+  padding:12px 16px !important;
+  min-height:auto !important;
+  height:auto !important;
+  color:#fff !important;
+}
+
+html body .v36-footer-inner{
+  max-width:980px !important;
+  margin:0 auto !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:28px !important;
+}
+
+html body .v36-footer .footer-logo-wrap{
+  margin:0 !important;
+  padding:0 !important;
+  line-height:0 !important;
+}
+
+html body .v36-footer img.footer-logo-same{
+  display:block !important;
+  width:280px !important;
+  max-width:280px !important;
+  height:auto !important;
+  margin:0 !important;
+  filter:brightness(1.22) contrast(1.08) drop-shadow(0 0 16px rgba(255,255,255,.16)) !important;
+}
+
+html body .v36-footer .footer-text{
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  text-align:center !important;
+  gap:5px !important;
+}
+
+html body .v36-footer .footer-contact-line{
+  display:flex !important;
+  flex-direction:row !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:8px !important;
+  flex-wrap:nowrap !important;
+  white-space:nowrap !important;
+  overflow-x:auto !important;
+  max-width:100% !important;
+}
+
+html body .v36-footer .footer-admin-link{
+  display:inline-flex !important;
+  margin-top:5px !important;
+  padding:6px 13px !important;
+  border-radius:999px !important;
+  border:1px solid rgba(255,255,255,.28) !important;
+  background:rgba(255,255,255,.09) !important;
+  color:#fff !important;
+  font-size:12px !important;
+  font-weight:850 !important;
+  text-decoration:none !important;
+}
+
+@media(max-width:760px){
+  html body .v36-footer-inner{
+    flex-direction:column !important;
+    gap:8px !important;
+  }
+
+  html body .v36-footer img.footer-logo-same{
+    width:255px !important;
+    max-width:72vw !important;
+  }
+
+  html body .v36-footer .footer-contact-line a,
+  html body .v36-footer .footer-contact-line span{
+    font-size:12px !important;
+  }
+}
+</style>
+
+
+<style id="v37-footer-logo-fix">
+/* V37: footer logo visibility only */
+html body .v36-footer img.footer-logo-same,
+html body .site-footer img.footer-logo-same,
+html body .site-footer .footer-logo-wrap img{
+  width:322px !important;
+  max-width:322px !important;
+  height:auto !important;
+  filter:
+    brightness(1.45)
+    contrast(1.14)
+    saturate(1.08)
+    drop-shadow(0 0 10px rgba(255,255,255,.20))
+    drop-shadow(0 0 28px rgba(255,255,255,.16)) !important;
+  opacity:1 !important;
+}
+
+@media(max-width:760px){
+  html body .v36-footer img.footer-logo-same,
+  html body .site-footer img.footer-logo-same,
+  html body .site-footer .footer-logo-wrap img{
+    width:294px !important;
+    max-width:78vw !important;
+  }
+}
+</style>
+
+
+<style id="v38-footer-transparent">
+html body .v36-footer .footer-logo-wrap,
+html body .site-footer .footer-logo-wrap{
+ background:transparent !important;
+ border:0 !important;
+ border-radius:0 !important;
+ min-width:0 !important;
+ padding:0 !important;
+ box-shadow:none !important;
+}
+html body .v36-footer img.footer-logo-same,
+html body .site-footer img.footer-logo-same{
+ width:320px !important;
+ max-width:320px !important;
+ height:auto !important;
+ filter:none !important;
+ background:transparent !important;
+ opacity:1 !important;
+}
+@media(max-width:760px){
+ html body .v36-footer img.footer-logo-same,
+ html body .site-footer img.footer-logo-same{
+  width:260px !important;
+  max-width:72vw !important;
+ }
+}
+</style>
+
+
+<style id="v39-aluminium">
+/* ===== V39: Hero + Footer auf denselben hellen Aluminium-/Stahlton =====
+   Einheitlicher moderner Industrie-Look. Alle anderen Sektionen unverändert. */
+
+/* Helles Silber-Grau mit subtilem Verlauf für mehr Tiefe (mid silver gradient).
+   Mittelweg zwischen der alten dunklen und der sehr hellen, nahezu weißen Version.
+   Hochwertiger Schweizer Industrie-Look; der Edelstahlrahmen des Hero-Bilds
+   hebt sich durch den kühlen Silberton ab. */
+.hero{
+  background:linear-gradient(135deg,#F3F5F7 0%,#EEF1F4 46%,#E7EBEF 100%) !important;
+}
+html body footer.site-footer.v36-footer{
+  background:linear-gradient(135deg,#f4f6f8 0%,#cdd2d7 26%,#eef0f2 50%,#bcc2c8 74%,#dfe2e5 100%) !important;
+  border-top:1px solid rgba(20,40,60,.12) !important;
+  color:#1d2733 !important;
+}
+
+/* Hero-Text auf hellem Hintergrund lesbar halten */
+.hero{color:#1d2733 !important;}
+.hero h1{color:#16222f !important;}
+.hero .lead{color:#33414f !important;}
+.hero .btn.ghost,
+.hero .ghost{
+  border:1px solid rgba(20,40,60,.34) !important;
+  color:#13283f !important;
+  background:rgba(255,255,255,.5) !important;
+}
+
+/* Footer-Text auf hellem Hintergrund lesbar halten */
+html body .v36-footer .footer-text strong,
+html body .site-footer .footer-text strong{color:#13202e !important;}
+html body .v36-footer .footer-services,
+html body .site-footer .footer-services{color:#33414f !important;}
+html body .v36-footer .footer-contact-line a,
+html body .v36-footer .footer-contact-line span,
+html body .site-footer .footer-contact-line a,
+html body .site-footer .footer-contact-line span{color:#13283f !important;}
+html body .v36-footer .footer-admin-link,
+html body .site-footer .footer-admin-link{
+  border:1px solid rgba(20,40,60,.30) !important;
+  background:rgba(20,40,60,.06) !important;
+  color:#13283f !important;
+}
+</style>
+
+
+<style id="v41-premium">
+/* ===== V41: Premium-Refinement =====
+   Ziel: bessere visuelle Hierarchie, Kontrast, Tiefe, Typografie und Conversion.
+   Rein additiv und als letzter <style>-Block bewusst mit höchster Kaskaden-Priorität.
+   Inhalte, Menüstruktur, Logo und Markenfarben (Navy #07111f / Orange #ff8a00)
+   bleiben unverändert. */
+
+/* — Typografie: echtes Inter laden (war deklariert, aber nie eingebunden) — */
+html body{
+  font-family:Inter,"Helvetica Neue",Arial,sans-serif !important;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+
+/* — HERO: gebürsteter Stahl mit echter Tiefe + dezentem Marken-Glow.
+     Lichtreflex oben links hält das navyblaue Logo gut lesbar. — */
+.hero{
+  background:
+    radial-gradient(circle at 84% 14%, rgba(255,138,0,.14), transparent 34%),
+    radial-gradient(120% 95% at 8% -12%, rgba(255,255,255,.66), transparent 56%),
+    linear-gradient(135deg,#ccd2d7 0%,#b5bcc3 33%,#cfd5da 58%,#a7afb6 100%) !important;
+  border-bottom:1px solid rgba(20,40,60,.16) !important;
+  box-shadow:inset 0 -70px 90px -64px rgba(7,17,31,.30) !important;
+}
+.hero h1{
+  color:#101b27 !important;
+  font-weight:900 !important;
+  letter-spacing:-.03em !important;
+}
+.hero .lead{
+  color:#36424e !important;
+  font-weight:600 !important;
+}
+.hero .eyebrow{
+  display:inline-flex !important;
+  align-items:center !important;
+  gap:11px !important;
+  color:#0B2D5C !important;
+  font-weight:900 !important;
+}
+.hero .eyebrow::before{
+  content:"" !important;
+  flex:0 0 auto !important;
+  width:28px !important;
+  height:3px !important;
+  border-radius:99px !important;
+  background:var(--orange) !important;
+}
+
+/* — Buttons / Conversion: kräftigere primäre CTA, klare Hover- und Fokuszustände — */
+.btn{
+  transition:transform .18s ease, box-shadow .18s ease, background .18s ease !important;
+}
+.btn.primary{
+  background:linear-gradient(180deg,#ffa12a 0%,#ff8a00 100%) !important;
+  color:#1c1303 !important;
+  box-shadow:0 10px 24px -6px rgba(255,138,0,.5), inset 0 1px 0 rgba(255,255,255,.42) !important;
+}
+.btn.primary:hover{
+  transform:translateY(-2px) !important;
+  box-shadow:0 16px 34px -8px rgba(255,138,0,.62), inset 0 1px 0 rgba(255,255,255,.5) !important;
+}
+.hero .btn.ghost{
+  border:1.5px solid rgba(11,45,92,.42) !important;
+  color:#0B2D5C !important;
+  background:rgba(255,255,255,.55) !important;
+}
+.hero .btn.ghost:hover{
+  background:#ffffff !important;
+  transform:translateY(-2px) !important;
+  box-shadow:0 14px 28px -12px rgba(7,17,31,.34) !important;
+}
+.btn:focus-visible{
+  outline:3px solid rgba(255,138,0,.6) !important;
+  outline-offset:2px !important;
+}
+a:focus-visible{
+  outline:3px solid rgba(255,138,0,.5);
+  outline-offset:2px;
+}
+
+/* — Trust-Strip: ruhiger Stahlton mit feinen Trennkanten — */
+.trust-strip{
+  background:#d2d9e0 !important;
+  border-top:1px solid rgba(20,40,60,.12) !important;
+  border-bottom:1px solid rgba(20,40,60,.12) !important;
+}
+.trust-strip strong{
+  color:#13202e !important;
+  letter-spacing:-.01em !important;
+}
+
+/* — Section-Überschriften: stärkeres Gewicht, präzisere Spur — */
+.section h2{
+  font-weight:800 !important;
+  letter-spacing:-.025em !important;
+  color:#13202e !important;
+}
+.dark h2{color:#ffffff !important;}
+
+/* — Service-Karten: Tiefe, Hover-Lift und große orange Indexnummer — */
+.service-grid article{
+  background:linear-gradient(180deg,#ffffff 0%,#f6fafc 100%) !important;
+  border:1px solid #e2e9f0 !important;
+  border-radius:20px !important;
+  box-shadow:0 1px 0 rgba(255,255,255,.7) inset, 0 22px 44px -20px rgba(15,35,60,.26) !important;
+  transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease !important;
+}
+.service-grid article:hover{
+  transform:translateY(-5px) !important;
+  border-color:rgba(255,138,0,.45) !important;
+  box-shadow:0 1px 0 rgba(255,255,255,.7) inset, 0 30px 56px -20px rgba(15,35,60,.32) !important;
+}
+.service-grid span{
+  display:block !important;
+  font-size:30px !important;
+  line-height:1 !important;
+  color:var(--orange) !important;
+  font-weight:900 !important;
+  letter-spacing:-.02em !important;
+  margin-bottom:8px !important;
+}
+.service-grid h3{font-weight:800 !important;color:#13202e !important;}
+
+/* — Projekt-Karten (dunkle Sektion): mehr Tiefe + Hover — */
+.dark{
+  background:linear-gradient(135deg,#07111f 0%,#0d2136 60%,#0f2740 100%) !important;
+}
+.project-card{
+  border-radius:20px !important;
+  box-shadow:0 24px 48px -24px rgba(0,0,0,.6) !important;
+  transition:transform .2s ease, box-shadow .2s ease !important;
+}
+.project-card:hover{
+  transform:translateY(-5px) !important;
+  box-shadow:0 32px 62px -24px rgba(0,0,0,.72) !important;
+}
+
+/* — Kalender- & Formular-Karte: premium Schatten — */
+.calendar-card,
+.contact-form{
+  border-radius:24px !important;
+  box-shadow:0 30px 70px -30px rgba(15,35,60,.40) !important;
+}
+.calendar-head button{transition:background .2s ease !important;}
+.calendar-head button:hover{background:#e2eef9 !important;}
+
+/* — Fakten-Chips: dezenter Rahmen + warmer Hover — */
+.facts span{
+  background:#eef3f6 !important;
+  border:1px solid #dfe7ee !important;
+  transition:background .2s ease, border-color .2s ease !important;
+}
+.facts span:hover{
+  background:#fff5e9 !important;
+  border-color:rgba(255,138,0,.4) !important;
+}
+
+/* — Section-Kicker: Markenorange als klarer Anker der Hierarchie — */
+.kicker{color:var(--orange) !important;}
+
+/* — Formularfelder: sichtbarer, markenkonformer Fokus — */
+.contact-form input:focus,
+.contact-form textarea:focus{
+  outline:none !important;
+  border-color:var(--orange) !important;
+  box-shadow:0 0 0 3px rgba(255,138,0,.16) !important;
+  background:#ffffff !important;
+}
+
+/* — Footer: dezente orange Markenkante oben für Abschluss & Zusammenhalt — */
+html body footer.site-footer.v36-footer{
+  border-top:3px solid var(--orange) !important;
+}
+</style>
+
+
+<style id="v42-premium-hero">
+/* ===== V42: Premium Swiss Industrial Refinement (2026) =====
+   Aufbauend auf V41. Rein additiv, letzter <style>-Block → höchste Kaskaden-
+   Priorität. Ziel: stärkere visuelle Hierarchie, mehr Tiefe & Kontrast,
+   gebürsteter Stahl / Engineering-Look, hochwertigere CTA-Buttons.
+   Unverändert: Logo, Firmenname, Texte, Menüstruktur, Markenfarben
+   (Navy #07111f / Orange #ff8a00). */
+
+/* — HERO-HINTERGRUND: gebürsteter Stahl mit echter Tiefe —
+   Schichten (oben → unten): feine Schliffstruktur des Metalls, warmer
+   Marken-Glow oben rechts, Lichtreflex oben links, kühler Stahl-Verlauf.
+   Der Lichtreflex oben links hält Logo (Navy) und H1 klar lesbar. */
+html body .hero{
+  background:
+    repeating-linear-gradient(102deg, rgba(255,255,255,.05) 0 1px, transparent 1px 6px),
+    radial-gradient(circle at 85% 12%, rgba(255,138,0,.17), transparent 40%),
+    radial-gradient(135% 95% at 4% -18%, rgba(255,255,255,.72), transparent 58%),
+    linear-gradient(135deg,#cfd6dc 0%,#b2bac2 34%,#c8cfd6 60%,#9fa8b1 100%) !important;
+  border-bottom:1px solid rgba(20,40,60,.18) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.55),
+    inset 0 -90px 110px -70px rgba(7,17,31,.42) !important;
+}
+
+/* — LINKS/RECHTS-BALANCE: Text bekommt mehr Gewicht, ruhigerer Rhythmus.
+     Nur Desktop/Tablet; die mobile Flex-Stapelung bleibt unberührt. — */
+@media (min-width:761px){
+  html body .hero{
+    grid-template-columns:1.05fr 0.95fr !important;
+    gap:64px !important;
+    align-items:center !important;
+    padding:54px 6vw 70px !important;
+    min-height:620px !important;
+  }
+
+  /* — CNC-BILD als Engineering-Panel: Rahmen sitzt eng am Bild (3:2),
+       weiche Rundung, mehrlagiger Premium-Schatten + feiner Metallring. — */
+  html body .hero-photo{
+    aspect-ratio:3 / 2 !important;
+    width:100% !important;
+    max-width:560px !important;
+    min-height:0 !important;
+    max-height:none !important;
+    margin-left:auto !important;
+    background-size:cover !important;
+    background-position:center !important;
+    border-radius:22px !important;
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,.40),
+      0 2px 1px rgba(255,255,255,.30),
+      0 34px 70px -28px rgba(7,17,31,.62),
+      0 14px 30px -18px rgba(7,17,31,.50) !important;
+  }
+}
+
+/* — TYPOGRAFIE: klarere Hierarchie, bessere Lesbarkeit — */
+html body .hero h1{
+  color:#0e1a26 !important;
+  font-weight:900 !important;
+  font-size:clamp(38px,4vw,64px) !important;
+  line-height:1.02 !important;
+  letter-spacing:-.035em !important;
+  max-width:14ch !important;
+  margin:14px 0 20px !important;
+}
+
+/* — DEUTSCH: Die deutschen Komposita (Industrieanlagen, Produktions-
+     systeme) sind deutlich länger als die kurzen englischen Wörter und
+     brechen in der 14ch-Spalte unruhig um (einsames „und“, abgehackte
+     Zeilen). Eigene Abstimmung, damit die deutsche H1 denselben
+     ausgewogenen, hochwertigen Rhythmus wie die englische Referenz
+     erhält: breitere Spalte für die langen Wörter, leicht reduzierter
+     Grad, ruhigere Laufweite und ausbalancierter Umbruch. Die englische
+     Variante (html[lang="en"]) bleibt unverändert. */
+html[lang="de"] body .hero h1{
+  font-size:clamp(34px,3.5vw,56px) !important;
+  line-height:1.07 !important;
+  letter-spacing:-.022em !important;
+  max-width:20ch !important;
+  text-wrap:balance !important;
+}
+@media (min-width:761px){
+  html[lang="de"] body .hero{
+    grid-template-columns:1.12fr 0.88fr !important;
+  }
+}
+
+html body .hero .lead{
+  color:#2c3845 !important;
+  font-weight:550 !important;
+  font-size:clamp(17px,1.25vw,21px) !important;
+  line-height:1.55 !important;
+  max-width:54ch !important;
+}
+
+/* — EYEBROW als feiner Engineering-Tag mit Marken-Akzent — */
+html body .hero .eyebrow{
+  display:inline-flex !important;
+  align-items:center !important;
+  gap:11px !important;
+  padding:8px 15px !important;
+  border-radius:999px !important;
+  background:rgba(255,255,255,.46) !important;
+  border:1px solid rgba(20,40,60,.16) !important;
+  box-shadow:0 1px 0 rgba(255,255,255,.6) inset !important;
+  color:#0B2D5C !important;
+  font-size:12px !important;
+  letter-spacing:.15em !important;
+  font-weight:900 !important;
+  backdrop-filter:saturate(1.1) blur(2px) !important;
+}
+html body .hero .eyebrow::before{
+  content:"" !important;
+  width:26px !important;
+  height:3px !important;
+  border-radius:99px !important;
+  background:var(--orange) !important;
+}
+
+/* — CTA-BUTTONS: größere primäre Aktion, Sheen, klarer Hover/Glow.
+     Stärkere Konversions-Hierarchie zwischen Primär- und Ghost-Button. — */
+html body .hero .actions{
+  gap:16px !important;
+  margin-top:34px !important;
+}
+html body .hero .actions .btn{
+  min-height:54px !important;
+  padding:0 30px !important;
+  font-size:15px !important;
+  letter-spacing:.01em !important;
+  border-radius:999px !important;
+}
+html body .hero .actions .btn.primary,
+html body .btn.primary{
+  position:relative !important;
+  overflow:hidden !important;
+  background:linear-gradient(180deg,#ffa733 0%,#ff8a00 52%,#f57f00 100%) !important;
+  color:#1b1203 !important;
+  box-shadow:
+    0 14px 30px -8px rgba(255,138,0,.55),
+    inset 0 1px 0 rgba(255,255,255,.55) !important;
+}
+html body .hero .actions .btn.primary::after{
+  content:"" !important;
+  position:absolute !important;
+  inset:0 0 auto 0 !important;
+  height:50% !important;
+  background:linear-gradient(180deg,rgba(255,255,255,.42),transparent) !important;
+  pointer-events:none !important;
+}
+html body .hero .actions .btn.primary:hover,
+html body .btn.primary:hover{
+  transform:translateY(-3px) !important;
+  box-shadow:
+    0 22px 42px -10px rgba(255,138,0,.68),
+    inset 0 1px 0 rgba(255,255,255,.6) !important;
+}
+html body .hero .actions .btn.ghost{
+  border:1.5px solid rgba(11,45,92,.46) !important;
+  color:#0B2D5C !important;
+  background:rgba(255,255,255,.6) !important;
+  box-shadow:0 1px 0 rgba(255,255,255,.7) inset !important;
+}
+html body .hero .actions .btn.ghost:hover{
+  background:#ffffff !important;
+  transform:translateY(-3px) !important;
+  box-shadow:0 16px 30px -14px rgba(7,17,31,.4) !important;
+}
+
+/* — Mobile: gerahmtes Bild auch klein hochwertig, Buttons gut greifbar — */
+@media (max-width:760px){
+  html body .hero-photo{
+    aspect-ratio:3 / 2 !important;
+    width:100% !important;
+    max-width:460px !important;
+    min-height:0 !important;
+    max-height:none !important;
+    margin:0 auto !important;
+    background-size:cover !important;
+    background-position:center !important;
+    border-radius:18px !important;
+    box-shadow:0 22px 46px -22px rgba(7,17,31,.6) !important;
+  }
+  html body .hero .actions .btn{
+    min-height:52px !important;
+  }
+}
+</style>
+</head>
+<body>
+  
+  <header class="topbar">
+    <a class="brand" href="#home" data-i18n-aria-label="brand.home" aria-label="TeoMaks Startseite"></a>
+
+    <div class="header-actions">
+      <div class="lang-switch" role="group" aria-label="Sprache / Language">
+        <button type="button" class="lang-btn" data-lang="de">DE</button>
+        <span class="lang-sep" aria-hidden="true">|</span>
+        <button type="button" class="lang-btn" data-lang="en">EN</button>
+      </div>
+      <a class="whatsapp-nav" href="https://wa.me/41764619949" data-i18n-aria-label="whatsapp.label" aria-label="WhatsApp Kontakt" title="WhatsApp">
+        <svg viewBox="0 0 32 32" width="22" height="22" aria-hidden="true" focusable="false">
+          <path fill="currentColor" d="M16 3.2C8.9 3.2 3.2 8.9 3.2 16c0 2.3.6 4.4 1.7 6.3L3.1 28.8l6.7-1.7c1.8 1 3.9 1.6 6.2 1.6 7.1 0 12.8-5.7 12.8-12.8S23.1 3.2 16 3.2zm0 23.3c-2 0-3.9-.5-5.5-1.5l-.4-.2-4 1 1.1-3.9-.3-.4c-1.1-1.7-1.7-3.7-1.7-5.8 0-5.9 4.8-10.7 10.8-10.7S26.8 10 26.8 16 22 26.5 16 26.5zm5.9-8c-.3-.2-1.9-.9-2.2-1-.3-.1-.5-.2-.7.2-.2.3-.8 1-1 1.2-.2.2-.4.2-.7.1-1.9-.9-3.1-1.7-4.4-3.8-.3-.6.3-.5.9-1.7.1-.2 0-.4 0-.6-.1-.2-.7-1.7-1-2.3-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.2 1.2-1.2 2.9 0 1.7 1.2 3.3 1.4 3.6.2.2 2.5 3.8 6 5.3 2.2 1 3.1 1 4.2.9.7-.1 1.9-.8 2.2-1.5.3-.7.3-1.4.2-1.5-.1-.2-.3-.2-.6-.4z"/>
+        </svg>
+      </a>
+    </div>
+
+    <button class="menu-toggle" id="menuToggle" data-i18n-aria-label="menu.open" aria-label="Menü öffnen" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+
+    <nav id="siteNav">
+          <a href="#leistungen" data-i18n="nav.services">Leistungen</a>
+          <a href="#ueber-mich" data-i18n="nav.about">Über mich</a>
+          <a href="#projekte" data-i18n="nav.projects">Projekte</a>
+          <a href="#verfuegbarkeit" data-i18n="nav.availability">Verfügbarkeit</a>
+          <a href="#kontakt" data-i18n="nav.contact">Kontakt</a>
+          <a href="#datenschutz" data-i18n="nav.privacy">Datenschutz</a>
+</nav>
+  </header>
+
+
+  <main id="home">
+    <section class="hero">
+      <div class="hero-text">
+        <img class="hero-logo-main" src="assets/teomaks-logo-transparent.png" data-i18n-alt="logo.alt" alt="TeoMaks GmbH Logo" />
+        <p class="eyebrow" data-i18n="hero.eyebrow">Industrieservice · Wartung · Instandhaltung · Montage</p>
+        <h1 data-i18n="hero.h1">Zuverlässiger Service für Industrieanlagen und Produktionssysteme.</h1>
+        <p class="lead" data-i18n="hero.lead">Wartung, Instandhaltung, Revisionen, Störungsbehebungen und technische Einsätze für Industrieanlagen, Maschinen und Produktionssysteme in der Schweiz und international.</p>
+        <div class="actions">
+          <a class="btn primary" href="#kontakt" data-i18n="hero.btnRequest">Anfrage senden</a>
+          <a class="btn ghost" href="#verfuegbarkeit" data-i18n="hero.btnAvailability">Verfügbarkeit prüfen</a>
+        </div>
+      </div>
+      <div class="hero-photo" role="img" data-i18n-aria-label="hero.photoAlt" aria-label="CNC Maschine in einer modernen Industriehalle"></div>
+    </section>
+
+    <section class="trust-strip">
+      <div><strong data-i18n="trust.1.t">Schweizweit</strong><span data-i18n="trust.1.s">Serviceeinsätze vor Ort</span></div>
+      <div><strong data-i18n="trust.2.t">International</strong><span data-i18n="trust.2.s">Technische Einsätze im Ausland</span></div>
+      <div><strong data-i18n="trust.3.t">Industrieanlagen · Maschinenservice · Instandhaltung</strong><span data-i18n="trust.3.s">Wartung, Montage, Reparatur und Revision</span></div>
+    </section>
+
+    <section id="leistungen" class="section light">
+      <p class="kicker" data-i18n="services.kicker">Leistungen</p>
+      <h2 data-i18n="services.h2">Technische Unterstützung, wenn Anlagen laufen müssen.</h2>
+      <div class="service-grid">
+        <article>
+          <span>01</span>
+          <h3 data-i18n="services.1.h">Wartung & Instandhaltung</h3>
+          <p data-i18n="services.1.p">Preventive und korrigierende Wartung von Industrieanlagen und Produktionssystemen.</p>
+        </article>
+        <article>
+          <span>02</span>
+          <h3 data-i18n="services.2.h">Störungsbehebung</h3>
+          <p data-i18n="services.2.p">Fehlerdiagnose, Instandsetzung und Unterstützung bei ungeplanten Stillständen.</p>
+        </article>
+        <article>
+          <span>03</span>
+          <h3 data-i18n="services.3.h">Montage & Umbauten</h3>
+          <p data-i18n="services.3.p">Installation, Demontage, Anpassungen und technische Einsätze direkt vor Ort.</p>
+        </article>
+        <article>
+          <span>04</span>
+          <h3 data-i18n="services.4.h">Produktionsanlagen</h3>
+          <p data-i18n="services.4.p">Service und Unterstützung für Produktionssysteme, Fertigungsanlagen und Maschinenperipherie.</p>
+        </article>
+      </div>
+    </section>
+
+    
+    <section id="ueber-mich" class="section about-owner">
+      <div class="owner-photo">
+        <img src="assets/owner-teomaks.jpeg" data-i18n-alt="owner.photoAlt" alt="TeoMaks GmbH Servicetechniker vor einer Werkzeugmaschine" />
+      </div>
+      <div class="owner-copy">
+        <p class="kicker" data-i18n="about.kicker">Über mich</p>
+        <h2 data-i18n="about.h2">Erfahrung aus Werkzeugmaschinenbau, Produktion und internationalem Service.</h2>
+        <p data-i18n="about.p1">Ich bin erfahrener CNC-Service-Techniker und seit dem 01.01.2025 selbstständig als Freelancer tätig.</p>
+        <p data-i18n="about.p2">Durch meine langjährige Erfahrung im Werkzeugmaschinenbau sowie meine umfassenden Kenntnisse in Produktion, Montage, Inbetriebnahme, Neuanlagenaufbau und technischem Service verfüge ich über ein breites Fachwissen im industriellen Umfeld.</p>
+        <p data-i18n="about.p3">Während meiner 19-jährigen Tätigkeit bei Starrag war ich in unterschiedlichen technischen Bereichen eingesetzt – von der Produktion über die Montage bis hin zum internationalen Service. In den letzten zwei Jahren übernahm ich zusätzlich Verantwortung als stellvertretender Abteilungsleiter.</p>
+        <p data-i18n="about.p4">Diese Kombination aus Hands-on-Technik und Koordination ermöglicht mir ein strukturiertes, lösungsorientiertes Arbeiten – auch unter Zeitdruck und bei komplexen Maschinen.</p>
+        <p data-i18n="about.p5">Heute unterstütze ich Kunden als Freelancer bei Inbetriebnahmen, Störungsanalysen, Optimierungen, Wartungen und Serviceeinsätzen weltweit. Ich arbeite selbstständig, zuverlässig und mit hohem Qualitätsanspruch und bin kurzfristig verfügbar.</p>
+        <div class="facts">
+          <span data-i18n="about.fact1">19 Jahre Erfahrung</span>
+          <span data-i18n="about.fact2">CNC-Service-Techniker</span>
+          <span data-i18n="about.fact3">Internationaler Service</span>
+          <span data-i18n="about.fact4">Freelancer seit 2025</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="projekte" class="section dark">
+      <p class="kicker" data-i18n="projects.kicker">Abgeschlossene Projekte</p>
+      <h2 data-i18n="projects.h2">Beispiele aus Service, Montage und Instandhaltung.</h2>
+      <div class="project-grid" id="completedProjects">
+      </div>
+    </section>
+
+    <section class="section about">
+      <div>
+        <p class="kicker" data-i18n="about2.kicker">Über TeoMaks</p>
+        <h2 data-i18n="about2.h2">Direkter technischer Service für industrielle Kunden.</h2>
+      </div>
+      <div>
+        <p data-i18n="about2.p">TeoMaks GmbH unterstützt Unternehmen bei Wartung, Montage, Reparatur und Revision von Maschinen und Anlagen. Der Fokus liegt auf zuverlässigen Einsätzen, klarer Kommunikation und praxisnaher Problemlösung vor Ort.</p>
+        <div class="facts">
+          <span data-i18n="about2.fact1">Standort St. Gallen</span>
+          <span data-i18n="about2.fact2">Industrieanlagen & Maschinenservice</span>
+          <span data-i18n="about2.fact3">Einsätze international</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="kunden" class="section clients">
+      <div class="clients-intro">
+        <p class="kicker" data-i18n="clients.kicker">Unsere Kunden</p>
+        <h2 data-i18n="clients.h2">Vertrauen führender Industrieunternehmen.</h2>
+      </div>
+      <div class="clients-logos" id="clientsLogos">
+        <div class="logo-cell">
+          <img class="client-logo client-logo--starrag" src="assets/customer-starrag.png" loading="lazy" alt="Starrag" />
+        </div>
+        <div class="logo-cell">
+          <img class="client-logo client-logo--trikno" src="assets/customer-trikno.png" loading="lazy" alt="Trikno" />
+        </div>
+      </div>
+    </section>
+
+    <section id="kontakt" class="section contact">
+      <div class="contact-layout">
+        <div id="verfuegbarkeit" class="contact-availability">
+          <div class="availability-copy">
+            <p class="kicker" data-i18n="availability.kicker">Verfügbarkeit</p>
+            <h2 data-i18n="availability.h2">Freie Termine schnell erkennen.</h2>
+          </div>
+          <div class="calendar-card">
+            <div class="calendar-head">
+              <button id="prevMonth" data-i18n-aria-label="availability.prev" aria-label="Vorheriger Monat">‹</button>
+              <strong id="monthTitle">Monat</strong>
+              <button id="nextMonth" data-i18n-aria-label="availability.next" aria-label="Nächster Monat">›</button>
+            </div>
+            <div class="weekdays">
+              <span data-i18n="wd.mo">Mo</span><span data-i18n="wd.di">Di</span><span data-i18n="wd.mi">Mi</span><span data-i18n="wd.do">Do</span><span data-i18n="wd.fr">Fr</span><span data-i18n="wd.sa">Sa</span><span data-i18n="wd.so">So</span>
+            </div>
+            <div id="calendarDays" class="days"></div>
+            <div class="legend">
+              <span><i class="free"></i> <span data-i18n="availability.free">Verfügbar</span></span>
+              <span><i class="busy"></i> <span data-i18n="availability.busy">Ausgebucht</span></span>
+            </div>
+            <div class="range-bar">
+              <div class="range-summary" id="rangeSummary" hidden>
+                <span><span data-i18n="availability.from">Von</span>: <strong id="rangeFrom">–</strong></span>
+                <span><span data-i18n="availability.to">Bis</span>: <strong id="rangeTo">–</strong></span>
+              </div>
+              <button type="button" id="rangeReset" class="range-reset" data-i18n="availability.reset" hidden>Auswahl zurücksetzen</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="contact-main">
+          <div class="contact-intro">
+            <p class="kicker" data-i18n="contact.kicker">Kontakt</p>
+            <h2 data-i18n="contact.h2">Serviceeinsatz oder Verfügbarkeit anfragen.</h2>
+          </div>
+
+          <form name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field" class="contact-form">
+            <input type="hidden" name="form-name" value="contact" />
+            <p class="hidden">
+              <label><span data-i18n="contact.honeypot">Nicht ausfüllen:</span> <input name="bot-field" /></label>
+            </p>
+
+            <label>
+              <span data-i18n="contact.name">Name</span>
+              <input type="text" name="name" required autocomplete="name" />
+            </label>
+
+            <label>
+              <span data-i18n="contact.company">Firma</span>
+              <input type="text" name="firma" autocomplete="organization" />
+            </label>
+
+            <label>
+              <span data-i18n="contact.phone">Telefon</span>
+              <input type="tel" name="telefon" autocomplete="tel" />
+            </label>
+
+            <label>
+              <span data-i18n="contact.email">E-Mail</span>
+              <input type="email" name="email" required autocomplete="email" />
+            </label>
+
+            <label>
+              <span data-i18n="contact.date">Gewünschter Zeitraum</span>
+              <input type="text" name="termin" id="terminField" readonly inputmode="none" data-i18n-placeholder="contact.datePlaceholder" placeholder="Im Kalender Zeitraum wählen (optional)" />
+            </label>
+
+            <label class="wide">
+              <span data-i18n="contact.message">Nachricht</span>
+              <textarea name="nachricht" rows="5" data-i18n-placeholder="contact.placeholder" placeholder="Kurze Beschreibung des Einsatzes, der Maschine oder des Problems"></textarea>
+            </label>
+
+            <button class="btn primary form-btn" type="submit" data-i18n="contact.submit">Anfrage senden</button>
+            <p class="form-status form-success" id="formSuccess" role="status" aria-live="polite" data-i18n="contact.success" hidden>Vielen Dank! Ihre Anfrage wurde erfolgreich gesendet. Wir melden uns in Kürze bei Ihnen.</p>
+            <p class="form-status form-error" id="formError" role="alert" aria-live="assertive" data-i18n="contact.error" hidden>Es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut oder kontaktieren Sie uns direkt per E-Mail.</p>
+          </form>
+        </div>
+      </div>
+</section>
+  
+<section id="datenschutz" class="section light datenschutz-section">
+  <p class="kicker" data-i18n="privacy.kicker">Datenschutz</p>
+  <h2 data-i18n="privacy.h2">Datenschutzerklärung</h2>
+  <p data-i18n="privacy.intro">Informationen zum Umgang mit personenbezogenen Daten gemäß Schweizer Datenschutzgesetz (DSG).</p>
+  <div class="datenschutz-card">
+    <h3 data-i18n="privacy.h3a">Verantwortliche Stelle</h3>
+    <p>TeoMaks GmbH<br>info@teomaks.ch</p>
+    <h3 data-i18n="privacy.h3b">Kontaktaufnahme</h3>
+    <p data-i18n="privacy.pb">Wenn Sie uns per Formular, E-Mail oder Telefon kontaktieren, werden Ihre Angaben zur Bearbeitung der Anfrage verwendet.</p>
+    <h3 data-i18n="privacy.h3c">Technisch notwendige Funktionen</h3>
+    <p data-i18n="privacy.pc">Diese Website verwendet nur technisch notwendige Funktionen. Es werden keine Marketing-Cookies eingesetzt.</p>
+    <h3 data-i18n="privacy.h3d">Ihre Rechte</h3>
+    <p data-i18n="privacy.pd">Sie können Auskunft, Berichtigung oder Löschung Ihrer personenbezogenen Daten verlangen, soweit keine gesetzlichen Aufbewahrungspflichten entgegenstehen.</p>
+    <a class="privacy-full-link" href="datenschutz.html" data-i18n="privacy.full">Vollständige Datenschutzerklärung →</a>
+  </div>
+</section>
+
+</main>
+
+  
+  <footer class="site-footer v36-footer">
+  <div class="v36-footer-inner">
+    <div class="footer-logo-wrap">
+      <img class="footer-logo-same" src="assets/footer-logo-teomaks-transparent.png" data-i18n-alt="logo.alt" alt="TeoMaks GmbH Logo" />
+    </div>
+    <div class="footer-text">
+      <strong>TeoMaks GmbH</strong>
+      <div class="footer-services" data-i18n="footer.services">Industrieservice · Wartung · Instandhaltung · Montage</div>
+      <div class="footer-contact-line">
+        <a href="mailto:info@teomaks.ch">info@teomaks.ch</a>
+        <span>·</span>
+        <a href="tel:+41715584040">+41 71 558 40 40</a>
+        <span>·</span>
+        <a href="tel:+41764619949">+41 76 461 99 49</a>
+      </div>
+      <div class="footer-legal">
+        <a href="impressum.html" data-i18n="footer.imprint">Impressum</a>
+        <span aria-hidden="true">·</span>
+        <a href="datenschutz.html" data-i18n="footer.privacy">Datenschutz</a>
+        <span aria-hidden="true">·</span>
+        <a href="agb.html" data-i18n="footer.terms">AGB</a>
+      </div>
+      <a class="footer-admin-link" href="/admin/" data-i18n="footer.admin">Admin</a>
+    </div>
+  </div>
+</footer>
+
+
+
+  <div class="cookie-banner" id="cookieBanner" role="dialog" aria-live="polite">
+    <button class="cookie-close" id="cookieClose" type="button" data-i18n-aria-label="cookie.close" aria-label="Hinweis schließen">×</button>
+    <div>
+      <strong data-i18n="cookie.title">Datenschutzhinweis</strong>
+      <p data-i18n="cookie.text">Diese Website verwendet nur technisch notwendige Funktionen. Weitere Informationen finden Sie in der Datenschutzerklärung.</p>
+    </div>
+    <div class="cookie-actions">
+      <a class="cookie-link" href="datenschutz.html" data-i18n="cookie.link">Datenschutzerklärung</a>
+      <button id="acceptCookies" class="btn primary" data-i18n="cookie.accept">Akzeptieren</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+  <script src="i18n.js"></script>
+
+
+
+
+
+
+
+
+<script id="v36-menu-script">
+(function(){
+  function initMenu(){
+    var btn = document.getElementById("menuToggle");
+    var nav = document.getElementById("siteNav");
+    if(!btn || !nav) return;
+
+    btn.onclick = function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      var open = !nav.classList.contains("is-open");
+      nav.classList.toggle("is-open", open);
+      btn.classList.toggle("is-open", open);
+      btn.setAttribute("aria-expanded", open ? "true" : "false");
+    };
+
+    nav.querySelectorAll("a").forEach(function(a){
+      a.onclick = function(){
+        nav.classList.remove("is-open");
+        btn.classList.remove("is-open");
+        btn.setAttribute("aria-expanded", "false");
+      };
+    });
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", initMenu);
+  }else{
+    initMenu();
+  }
+})();
+</script>
+
+</body>
+</html>
