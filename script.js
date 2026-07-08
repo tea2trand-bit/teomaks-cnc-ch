@@ -60,6 +60,7 @@ function renderCalendar(){
     days.appendChild(el);
   }
 }
+window.renderCalendar = renderCalendar;
 // Let visitors pick a period in the calendar with a "Von" (from) and "Bis" (to)
 // day. A single click selects one day; a second click on a later (or earlier)
 // day completes the range. The selection is mirrored into the contact form's
@@ -225,20 +226,31 @@ async function loadCompletedProjects(){
 }
 loadCompletedProjects();
 
-// V7 mobile menu
-const menuToggle = document.getElementById("menuToggle");
-const siteNav = document.getElementById("siteNav");
-if(menuToggle && siteNav){
-  menuToggle.addEventListener("click", () => {
-    const isOpen = siteNav.classList.toggle("open");
-    menuToggle.setAttribute("aria-expanded", String(isOpen));
+function initMobileMenu(){
+  const menuToggle = document.getElementById("menuToggle");
+  const siteNav = document.getElementById("siteNav");
+  if(!menuToggle || !siteNav) return;
+
+  const setOpen = (open) => {
+    siteNav.classList.toggle("is-open", open);
+    menuToggle.classList.toggle("is-open", open);
+    menuToggle.setAttribute("aria-expanded", open ? "true" : "false");
+  };
+
+  menuToggle.addEventListener("click", (event) => {
+    event.preventDefault();
+    setOpen(!siteNav.classList.contains("is-open"));
   });
+
   siteNav.querySelectorAll("a").forEach(link => {
-    link.addEventListener("click", () => {
-      siteNav.classList.remove("open");
-      menuToggle.setAttribute("aria-expanded", "false");
-    });
+    link.addEventListener("click", () => setOpen(false));
   });
+}
+
+if(document.readyState === "loading"){
+  document.addEventListener("DOMContentLoaded", initMobileMenu);
+}else{
+  initMobileMenu();
 }
 
 // V7 cookie notice
@@ -262,67 +274,3 @@ if(cookieBanner && cookieClose){
     cookieBanner.classList.remove("show");
   });
 }
-
-
-// V25 mobile navigation
-document.addEventListener("DOMContentLoaded", () => {
-  const toggle = document.querySelector(".nav-toggle");
-  const nav = document.querySelector(".nav, .main-nav, .modern-nav, .site-nav");
-  if (toggle && nav) {
-    toggle.addEventListener("click", () => {
-      const open = nav.classList.toggle("nav-open");
-      toggle.classList.toggle("is-open", open);
-      toggle.setAttribute("aria-expanded", open ? "true" : "false");
-    });
-    nav.querySelectorAll("a").forEach((link) => {
-      link.addEventListener("click", () => {
-        nav.classList.remove("nav-open");
-        toggle.classList.remove("is-open");
-        toggle.setAttribute("aria-expanded", "false");
-      });
-    });
-  }
-});
-
-
-// V29 hamburger menu
-document.addEventListener("DOMContentLoaded", () => {
-  const menuToggle = document.getElementById("menuToggle");
-  const siteNav = document.getElementById("siteNav");
-
-  if (menuToggle && siteNav) {
-    menuToggle.addEventListener("click", () => {
-      const isOpen = siteNav.classList.toggle("is-open");
-      menuToggle.classList.toggle("is-open", isOpen);
-      menuToggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
-    });
-
-    siteNav.querySelectorAll("a").forEach((link) => {
-      link.addEventListener("click", () => {
-        siteNav.classList.remove("is-open");
-        menuToggle.classList.remove("is-open");
-        menuToggle.setAttribute("aria-expanded", "false");
-      });
-    });
-  }
-});
-
-
-// V32 hamburger
-document.addEventListener("DOMContentLoaded", () => {
-  const btn = document.getElementById("menuToggle");
-  const nav = document.getElementById("siteNav");
-  if (!btn || !nav) return;
-  btn.addEventListener("click", () => {
-    const open = nav.classList.toggle("is-open");
-    btn.classList.toggle("is-open", open);
-    btn.setAttribute("aria-expanded", open ? "true" : "false");
-  });
-  nav.querySelectorAll("a").forEach(a => {
-    a.addEventListener("click", () => {
-      nav.classList.remove("is-open");
-      btn.classList.remove("is-open");
-      btn.setAttribute("aria-expanded", "false");
-    });
-  });
-});

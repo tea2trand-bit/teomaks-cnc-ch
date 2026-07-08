@@ -20,6 +20,18 @@ function cleanBooked(input) {
     .sort();
 }
 
+function getAdminPassword() {
+  const adminPassword = (process.env.ADMIN_PASSWORD || "").trim();
+  return adminPassword || null;
+}
+
+function isAuthorized(req) {
+  const adminPassword = getAdminPassword();
+  if (!adminPassword) return false;
+  const provided = (req.headers.get("x-admin-password") || "").trim();
+  return provided === adminPassword;
+}
+
 export default async function handler(req) {
   if (req.method === "OPTIONS") {
     return new Response("", { status: 204, headers: CORS });
@@ -35,12 +47,10 @@ export default async function handler(req) {
   }
 
   if (req.method === "POST") {
-    // Trim so an accidental trailing newline/space in the env var (a common
-    // cause of "Unauthorized") doesn't break an otherwise correct password.
-    const adminPassword = (process.env.ADMIN_PASSWORD || "teomaks2026").trim();
-    const provided = (req.headers.get("x-admin-password") || "").trim();
-
-    if (provided !== adminPassword) {
+    if (!getAdminPassword()) {
+      return json({ error: "Admin password is not configured" }, 500);
+    }
+    if (!isAuthorized(req)) {
       return json({ error: "Unauthorized" }, 401);
     }
 

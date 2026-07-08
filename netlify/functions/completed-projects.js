@@ -7,6 +7,7 @@ const CORS = {
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS"
 };
 
+const MAX_PROJECT_IMAGE_BYTES = 6 * 1024 * 1024;
 const ALLOWED_TYPES = new Set(["image/png", "image/jpeg", "image/webp", "image/gif"]);
 
 function json(body, status = 200) {
@@ -20,8 +21,14 @@ function projectStore() {
   return getStore({ name: "completed-projects", consistency: "strong" });
 }
 
+function getAdminPassword() {
+  const adminPassword = (process.env.ADMIN_PASSWORD || "").trim();
+  return adminPassword || null;
+}
+
 function isAuthorized(req) {
-  const adminPassword = (process.env.ADMIN_PASSWORD || "teomaks2026").trim();
+  const adminPassword = getAdminPassword();
+  if (!adminPassword) return false;
   const provided = (req.headers.get("x-admin-password") || "").trim();
   return provided === adminPassword;
 }
@@ -37,6 +44,7 @@ function decodeDataUrl(dataUrl) {
   } catch {
     return null;
   }
+  if (bytes.length > MAX_PROJECT_IMAGE_BYTES) return null;
   return { contentType, bytes };
 }
 
@@ -154,6 +162,7 @@ export default async function handler(req) {
   }
 
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
+  if (!getAdminPassword()) return json({ error: "Admin password is not configured" }, 500);
   if (!isAuthorized(req)) return json({ error: "Unauthorized" }, 401);
 
   const action = url.searchParams.get("action") || "";

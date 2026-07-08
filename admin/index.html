@@ -19,7 +19,7 @@
 
   <section class="card hidden" id="panelLogos"><h2>Kundenlogos</h2><p>Logos für den Bereich „Unsere Kunden“ verwalten. Neue Logos hochladen, ersetzen, löschen, aktiv/inaktiv schalten und die Reihenfolge ändern. Nur aktive Logos erscheinen auf der Website.</p>
     <label for="logoUpload">Neues Kundenlogo hochladen</label>
-    <div class="row"><input id="logoUpload" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml,image/gif"><button id="uploadBtn">Hochladen</button></div>
+    <div class="row"><input id="logoUpload" type="file" accept="image/png,image/jpeg,image/webp,image/gif"><button id="uploadBtn">Hochladen</button></div>
     <div class="msg" id="logoMsg"></div>
     <div class="logo-list" id="logoList"></div>
   </section>
@@ -71,7 +71,7 @@ actions.append(up,down,toggle,replace,del);
 item.append(thumb,meta,actions);logoList.appendChild(item)})}
 async function logoAction(action,payload){const res=await fetch(LOGO_FN+"?action="+action,{method:"POST",headers:authHeaders({"Content-Type":"application/json"}),body:JSON.stringify(payload||{})});if(!res.ok){const t=await res.text().catch(()=>"");throw new Error(t.slice(0,120)||("HTTP "+res.status))}return res.json()}
 async function uploadLogo(){const file=logoUpload.files&&logoUpload.files[0];if(!file){logoMsg.textContent="Bitte zuerst eine Bilddatei auswählen.";return}logoMsg.textContent="Lädt hoch…";try{const image=await fileToDataUrl(file);await logoAction("create",{image});logoUpload.value="";logoMsg.textContent="Logo hinzugefügt.";await loadLogos()}catch(e){logoMsg.textContent="Fehler beim Hochladen: "+e.message}}
-function replaceLogo(id){const picker=document.createElement("input");picker.type="file";picker.accept="image/png,image/jpeg,image/webp,image/svg+xml,image/gif";picker.addEventListener("change",async()=>{const file=picker.files&&picker.files[0];if(!file)return;logoMsg.textContent="Ersetze…";try{const image=await fileToDataUrl(file);await logoAction("replace",{id,image});logoMsg.textContent="Logo ersetzt.";await loadLogos()}catch(e){logoMsg.textContent="Fehler beim Ersetzen: "+e.message}});picker.click()}
+function replaceLogo(id){const picker=document.createElement("input");picker.type="file";picker.accept="image/png,image/jpeg,image/webp,image/gif";picker.addEventListener("change",async()=>{const file=picker.files&&picker.files[0];if(!file)return;logoMsg.textContent="Ersetze…";try{const image=await fileToDataUrl(file);await logoAction("replace",{id,image});logoMsg.textContent="Logo ersetzt.";await loadLogos()}catch(e){logoMsg.textContent="Fehler beim Ersetzen: "+e.message}});picker.click()}
 async function deleteLogo(id){if(!confirm("Dieses Kundenlogo wirklich löschen?"))return;logoMsg.textContent="Lösche…";try{await logoAction("delete",{id});logoMsg.textContent="Logo gelöscht.";await loadLogos()}catch(e){logoMsg.textContent="Fehler beim Löschen: "+e.message}}
 async function toggleLogo(id){logoMsg.textContent="Aktualisiere…";try{await logoAction("toggle",{id});logoMsg.textContent="";await loadLogos()}catch(e){logoMsg.textContent="Fehler: "+e.message}}
 async function moveLogo(idx,dir){const target=idx+dir;if(target<0||target>=logos.length)return;const copy=logos.slice();const tmp=copy[idx];copy[idx]=copy[target];copy[target]=tmp;logos=copy;renderLogos();logoMsg.textContent="Reihenfolge wird gespeichert…";try{await logoAction("reorder",{order:logos.map(l=>l.id)});logoMsg.textContent="Reihenfolge gespeichert."}catch(e){logoMsg.textContent="Fehler beim Speichern der Reihenfolge: "+e.message;await loadLogos()}}

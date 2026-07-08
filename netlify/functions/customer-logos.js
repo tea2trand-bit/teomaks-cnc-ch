@@ -22,18 +22,25 @@ function logoStore() {
   return getStore({ name: "customer-logos", consistency: "strong" });
 }
 
+function getAdminPassword() {
+  const adminPassword = (process.env.ADMIN_PASSWORD || "").trim();
+  return adminPassword || null;
+}
+
 function isAuthorized(req) {
-  const adminPassword = (process.env.ADMIN_PASSWORD || "teomaks2026").trim();
+  const adminPassword = getAdminPassword();
+  if (!adminPassword) return false;
   const provided = (req.headers.get("x-admin-password") || "").trim();
   return provided === adminPassword;
 }
 
-// Only a small set of web-safe raster/vector image types is accepted for a logo.
+const MAX_LOGO_BYTES = 2 * 1024 * 1024;
+
+// Only web-safe raster image types are accepted for a logo.
 const ALLOWED_TYPES = new Set([
   "image/png",
   "image/jpeg",
   "image/webp",
-  "image/svg+xml",
   "image/gif"
 ]);
 
@@ -53,6 +60,7 @@ function decodeDataUrl(dataUrl) {
   } catch {
     return null;
   }
+  if (bytes.length > MAX_LOGO_BYTES) return null;
   return { contentType, bytes };
 }
 
@@ -119,6 +127,9 @@ export default async function handler(req) {
   // ---- Everything below mutates data and requires the admin password. ----
   if (req.method !== "POST") {
     return json({ error: "Method not allowed" }, 405);
+  }
+  if (!getAdminPassword()) {
+    return json({ error: "Admin password is not configured" }, 500);
   }
   if (!isAuthorized(req)) {
     return json({ error: "Unauthorized" }, 401);
