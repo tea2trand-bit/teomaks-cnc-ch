@@ -7,6 +7,7 @@ import {
   queueBlobCleanupIntents,
   scheduleBlobCleanup
 } from "./_shared/blob-cleanup.js";
+import { isPublishedProductionDeploy } from "./_shared/deploy-context.js";
 import { jsonResponse, responseHeaders, textResponse } from "./_shared/http.js";
 
 // The logo image bytes are stored in Netlify Blobs. Strong consistency means a
@@ -102,6 +103,16 @@ export default async function handler(req, context) {
   // Lightweight password check used by the admin login screen.
   if (action === "verify") {
     return jsonResponse({ ok: true });
+  }
+
+  // Netlify `getStore()` Blob namespaces are shared by every deploy of a
+  // site. A Deploy Preview has an isolated database branch, so allowing it to
+  // mutate media could delete a Blob that the published database still uses.
+  if (!isPublishedProductionDeploy(context)) {
+    return jsonResponse(
+      { error: "Media management is disabled outside the published production deploy" },
+      403
+    );
   }
 
   const mutationResponse = body => {

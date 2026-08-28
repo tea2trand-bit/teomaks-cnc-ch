@@ -248,6 +248,7 @@ export async function retryQueuedBlobDeletes(db, storeName, limit = 1, storeFact
 // cleanup retry finish in the remaining function lifetime. Cleanup therefore
 // never blocks login or the primary admin write path.
 export function scheduleBlobCleanup(context, db, storeName, storeFactory) {
+  if (!isPublishedProductionDeploy(context)) return false;
   if (!context || typeof context.waitUntil !== "function") return false;
   const task = retryQueuedBlobDeletes(db, storeName, 1, storeFactory).catch(error => {
     console.error("Deferred Blob cleanup failed", { storeName, error: errorMessage(error) });
@@ -260,3 +261,4 @@ export function scheduleBlobCleanup(context, db, storeName, storeFactory) {
     return false;
   }
 }
+import { isPublishedProductionDeploy } from "./deploy-context.js";

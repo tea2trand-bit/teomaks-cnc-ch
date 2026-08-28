@@ -132,3 +132,22 @@ test("static security headers and admin noindex are configured", async () => {
   assert.match(admin, /name="robots" content="noindex,nofollow,noarchive"/);
   assert.match(admin, /#loginCard\{width:100%;max-width:560px;margin-inline:auto\}/);
 });
+
+test("shared Blob mutations and cleanup fail closed outside published production", async () => {
+  const logos = await source("netlify/functions/customer-logos.js");
+  const projects = await source("netlify/functions/completed-projects.js");
+  const scheduled = await source("netlify/functions/blob-cleanup-scheduled.js");
+
+  const verify = logos.indexOf('action === "verify"');
+  const logoGuard = logos.indexOf("!isPublishedProductionDeploy(context)", verify);
+  const logoCreate = logos.indexOf('action === "create"', logoGuard);
+  assert.ok(verify >= 0 && logoGuard > verify && logoCreate > logoGuard);
+
+  const projectGuard = projects.indexOf("!isPublishedProductionDeploy(context)");
+  const projectCreate = projects.indexOf('action === "create"', projectGuard);
+  assert.ok(projectGuard >= 0 && projectCreate > projectGuard);
+
+  const scheduledGuard = scheduled.indexOf("!isPublishedProductionDeploy(context)");
+  const scheduledDatabase = scheduled.indexOf("getDatabase()", scheduledGuard);
+  assert.ok(scheduledGuard >= 0 && scheduledDatabase > scheduledGuard);
+});

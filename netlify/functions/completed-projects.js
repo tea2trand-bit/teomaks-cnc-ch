@@ -11,6 +11,7 @@ import {
   queueBlobCleanupIntents,
   scheduleBlobCleanup
 } from "./_shared/blob-cleanup.js";
+import { isPublishedProductionDeploy } from "./_shared/deploy-context.js";
 import { jsonResponse, responseHeaders, textResponse } from "./_shared/http.js";
 
 function projectStore() {
@@ -150,6 +151,12 @@ export default async function handler(req, context) {
   if (!isAuthorized(req)) return jsonResponse({ error: "Unauthorized" }, 401);
 
   const action = url.searchParams.get("action") || "";
+  if (!isPublishedProductionDeploy(context)) {
+    return jsonResponse(
+      { error: "Media management is disabled outside the published production deploy" },
+      403
+    );
+  }
   const mutationResponse = body => {
     scheduleBlobCleanup(context, db, "completed-projects", projectStore);
     return jsonResponse(body);

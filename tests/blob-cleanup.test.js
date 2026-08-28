@@ -205,7 +205,10 @@ test("worker cannot delete a newer cleanup intent after a stale reference check"
 
 test("cleanup retry is attached to waitUntil instead of blocking the response", async () => {
   let waited;
-  const context = { waitUntil(promise) { waited = promise; } };
+  const context = {
+    deploy: { context: "production", published: true },
+    waitUntil(promise) { waited = promise; }
+  };
   const db = {
     pool: {
       query: async query => {
@@ -219,6 +222,10 @@ test("cleanup retry is attached to waitUntil instead of blocking the response", 
   assert.equal(scheduleBlobCleanup(context, db, "customer-logos", storeFactory), true);
   assert.ok(waited instanceof Promise);
   assert.deepEqual(await waited, { deleted: 0, retained: 0, pending: 0 });
+  assert.equal(scheduleBlobCleanup({
+    deploy: { context: "deploy-preview", published: false },
+    waitUntil() { throw new Error("preview cleanup must not be scheduled"); }
+  }, db, "customer-logos", storeFactory), false);
   assert.equal(scheduleBlobCleanup(null, db, "customer-logos", storeFactory), false);
 });
 
