@@ -3,6 +3,7 @@
   "version": "13.0.0",
   "type": "module",
   "scripts": {
+    "build": "node scripts/build.mjs",
     "test": "node --test"
   },
   "dependencies": {

@@ -2,6 +2,8 @@
   directory = "netlify/functions"
 
 [build]
+  command = "npm test && npm run build"
+  publish = "dist"
   functions = "netlify/functions"
 
 [[headers]]

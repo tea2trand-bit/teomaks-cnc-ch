@@ -126,6 +126,8 @@ test("functions no longer grant wildcard cross-origin browser access", async () 
 test("static security headers and admin noindex are configured", async () => {
   const config = await source("netlify.toml");
   const admin = await source("admin/index.html");
+  assert.match(config, /command = "npm test && npm run build"/);
+  assert.match(config, /publish = "dist"/);
   assert.match(config, /X-Content-Type-Options = "nosniff"/);
   assert.match(config, /X-Frame-Options = "DENY"/);
   assert.match(config, /X-Robots-Tag = "noindex, nofollow, noarchive"/);
