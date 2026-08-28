@@ -299,6 +299,7 @@ function applyLang(lang) {
 
   // Re-render the calendar so the month title follows the active language.
   if (typeof window.renderCalendar === "function") window.renderCalendar();
+  if (typeof window.updateProjectUiLanguage === "function") window.updateProjectUiLanguage();
 }
 
 (function initI18n() {

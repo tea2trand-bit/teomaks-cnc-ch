@@ -135,6 +135,51 @@ test("static security headers and admin noindex are configured", async () => {
   assert.match(admin, /#loginCard\{width:100%;max-width:560px;margin-inline:auto\}/);
 });
 
+test("completed project cards preserve full images and expose an accessible viewer", async () => {
+  const html = await source("index.html");
+  const script = await source("script.js");
+  const styles = await source("styles.css");
+  const i18n = await source("i18n.js");
+
+  assert.doesNotThrow(() => new Function(script));
+  assert.match(html, /<dialog class="project-lightbox" id="projectImageDialog" aria-labelledby="projectImageDialogTitle">/);
+  assert.match(html, /id="projectImageDialogClose"[^>]*type="button"[^>]*aria-label="Bild schließen"/);
+  assert.match(html, /id="projectImageDialogOriginal"[^>]*target="_blank"[^>]*rel="noopener"/);
+
+  const photoRule = styles.match(/\.project-photo\{([\s\S]*?)\}/)?.[1];
+  const imageRule = styles.match(/\.project-photo img\{([\s\S]*?)\}/)?.[1];
+  assert.ok(photoRule, "project photo CSS rule is present");
+  assert.ok(imageRule, "project image CSS rule is present");
+  assert.match(photoRule, /aspect-ratio:3\/2/);
+  assert.doesNotMatch(photoRule, /height:/);
+  assert.match(imageRule, /object-fit:contain/);
+  assert.doesNotMatch(imageRule, /object-fit:cover/);
+  assert.doesNotMatch(styles, /\.project-photo\{height:190px\}/);
+  assert.match(styles, /\.project-lightbox:not\(\[open\]\)\{display:none\}/);
+
+  assert.match(script, /action\.setAttribute\("aria-haspopup", "dialog"\)/);
+  assert.match(script, /action\.setAttribute\("aria-controls", "projectImageDialog"\)/);
+  assert.match(script, /projectImageDialog\.showModal\(\)/);
+  assert.match(script, /projectImageDialogTrigger\.focus\(\)/);
+  assert.match(script, /if\(event\.target === projectImageDialog\) projectImageDialog\.close\(\)/);
+  assert.match(script, /if\(event\.key === "Escape"\)/);
+  assert.match(i18n, /window\.updateProjectUiLanguage/);
+});
+
+test("multiline checked project summaries render as safe semantic lists", async () => {
+  const script = await source("script.js");
+  const renderer = script.match(/function appendProjectSummary[\s\S]*?\n\}\n\nasync function loadCompletedProjects/)?.[0];
+  assert.ok(renderer, "project summary renderer is present");
+  assert.match(renderer, /text\.split\(\/\\r\?\\n\/\)/);
+  assert.match(renderer, /lines\.every\(line => \/\^\[✔✓\]/);
+  assert.match(renderer, /document\.createElement\("ul"\)/);
+  assert.match(renderer, /list\.className = "project-checklist"/);
+  assert.match(renderer, /document\.createElement\("li"\)/);
+  assert.match(renderer, /item\.textContent = line\.replace/);
+  assert.match(renderer, /summary\.className = "project-summary"/);
+  assert.doesNotMatch(renderer, /innerHTML/);
+});
+
 test("shared Blob mutations and cleanup fail closed outside published production", async () => {
   const logos = await source("netlify/functions/customer-logos.js");
   const projects = await source("netlify/functions/completed-projects.js");
