@@ -200,6 +200,109 @@ async function loadClientLogos(){
 }
 loadClientLogos();
 
+const projectImageDialog = document.getElementById("projectImageDialog");
+const projectImageDialogImage = document.getElementById("projectImageDialogImage");
+const projectImageDialogTitle = document.getElementById("projectImageDialogTitle");
+const projectImageDialogClose = document.getElementById("projectImageDialogClose");
+const projectImageDialogOriginal = document.getElementById("projectImageDialogOriginal");
+let projectImageDialogTrigger = null;
+
+function projectViewerCopy(){
+  return window.__lang === "en"
+    ? {
+        enlarge: "Enlarge image",
+        enlargeLabel: "Enlarge project image",
+        close: "Close image",
+        original: "Open original size"
+      }
+    : {
+        enlarge: "Vergrößern",
+        enlargeLabel: "Projektbild vergrößern",
+        close: "Bild schließen",
+        original: "Originalgröße öffnen"
+      };
+}
+
+function updateProjectUiLanguage(){
+  const copy = projectViewerCopy();
+  document.querySelectorAll(".project-photo-action").forEach(action => {
+    const projectTitle = action.dataset.projectTitle || "";
+    action.setAttribute("aria-label", copy.enlargeLabel + ": " + projectTitle);
+    const hint = action.querySelector(".project-photo-hint");
+    if(hint) hint.textContent = copy.enlarge;
+  });
+  if(projectImageDialogClose) projectImageDialogClose.setAttribute("aria-label", copy.close);
+  if(projectImageDialogOriginal) projectImageDialogOriginal.textContent = copy.original;
+}
+window.updateProjectUiLanguage = updateProjectUiLanguage;
+
+function openProjectImageDialog(trigger, project, image){
+  if(!projectImageDialog || !projectImageDialogImage || !projectImageDialogTitle || !projectImageDialogOriginal){
+    return false;
+  }
+  if(typeof projectImageDialog.showModal !== "function") return false;
+  const title = project.title || image.alt || "Projektbild";
+  projectImageDialogTrigger = trigger;
+  projectImageDialogImage.src = image.url;
+  projectImageDialogImage.alt = image.alt || title;
+  projectImageDialogTitle.textContent = title;
+  projectImageDialogOriginal.href = image.url;
+  document.body.classList.add("project-lightbox-open");
+  try{
+    projectImageDialog.showModal();
+    if(projectImageDialogClose) projectImageDialogClose.focus();
+    return true;
+  }catch(e){
+    document.body.classList.remove("project-lightbox-open");
+    projectImageDialogTrigger = null;
+    return false;
+  }
+}
+
+if(projectImageDialog){
+  if(projectImageDialogClose){
+    projectImageDialogClose.addEventListener("click", () => projectImageDialog.close());
+  }
+  projectImageDialog.addEventListener("click", event => {
+    if(event.target === projectImageDialog) projectImageDialog.close();
+  });
+  projectImageDialog.addEventListener("keydown", event => {
+    if(event.key === "Escape"){
+      event.preventDefault();
+      projectImageDialog.close();
+    }
+  });
+  projectImageDialog.addEventListener("close", () => {
+    document.body.classList.remove("project-lightbox-open");
+    if(projectImageDialogTrigger && document.contains(projectImageDialogTrigger)){
+      projectImageDialogTrigger.focus();
+    }
+    projectImageDialogTrigger = null;
+  });
+}
+
+function appendProjectSummary(article, value){
+  const text = typeof value === "string" ? value.trim() : "";
+  if(!text) return;
+  const lines = text.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+  const isChecklist = lines.length > 1 && lines.every(line => /^[✔✓]\s*/.test(line));
+  if(isChecklist){
+    const list = document.createElement("ul");
+    list.className = "project-checklist";
+    lines.forEach(line => {
+      const item = document.createElement("li");
+      item.textContent = line.replace(/^[✔✓]\s*/, "");
+      list.appendChild(item);
+    });
+    article.appendChild(list);
+    return;
+  }
+  const summary = document.createElement("p");
+  summary.className = "project-summary";
+  summary.textContent = text;
+  article.appendChild(summary);
+}
+
 async function loadCompletedProjects(){
   const container = document.getElementById("completedProjects");
   if(!container) return;
@@ -231,12 +334,26 @@ async function loadCompletedProjects(){
       if(firstImage && firstImage.url){
         const photo = document.createElement("div");
         photo.className = "project-photo";
+        const action = document.createElement("a");
+        action.className = "project-photo-action";
+        action.href = firstImage.url;
+        action.target = "_blank";
+        action.rel = "noopener";
+        action.dataset.projectTitle = project.title || "";
+        action.setAttribute("aria-haspopup", "dialog");
+        action.setAttribute("aria-controls", "projectImageDialog");
         const image = document.createElement("img");
         image.src = firstImage.url;
         image.alt = firstImage.alt || project.title || "Projektbild";
         image.loading = "lazy";
         image.decoding = "async";
-        photo.appendChild(image);
+        const hint = document.createElement("span");
+        hint.className = "project-photo-hint";
+        action.append(image, hint);
+        action.addEventListener("click", event => {
+          if(openProjectImageDialog(action, project, firstImage)) event.preventDefault();
+        });
+        photo.appendChild(action);
         article.appendChild(photo);
       }
 
@@ -244,9 +361,7 @@ async function loadCompletedProjects(){
       title.textContent = project.title || "";
       article.appendChild(title);
 
-      const summary = document.createElement("p");
-      summary.textContent = project.summary || "";
-      article.appendChild(summary);
+      appendProjectSummary(article, project.summary);
 
       if(project.description && project.description !== project.summary){
         const description = document.createElement("p");
@@ -264,6 +379,7 @@ async function loadCompletedProjects(){
       }
       container.appendChild(article);
     });
+    updateProjectUiLanguage();
   }catch(e){
     renderEmptyProjects();
   }
