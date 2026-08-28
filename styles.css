@@ -17,7 +17,7 @@
 html{scroll-behavior:smooth}
 body{
   margin:0;
-  font-family:Inter,"Helvetica Neue",Arial,sans-serif;
+  font-family:"Segoe UI","Helvetica Neue",Arial,sans-serif;
   color:var(--text);
   background:var(--paper);
   -webkit-font-smoothing:antialiased;
@@ -343,12 +343,26 @@ a:focus-visible,.btn:focus-visible,button:focus-visible{
 .project-card .project-description{font-size:15px;color:#aebdca}
 .project-empty{grid-column:1/-1;margin:0;color:#c9d5df;font-weight:800}
 .project-photo{
+  position:relative;
   height:270px;
   margin:-8px -8px 22px;
   border-radius:18px;
-  background-size:cover;
-  background-position:center;
+  overflow:hidden;
+}
+.project-photo img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center;
   filter:saturate(.98) contrast(1.04);
+}
+.project-photo::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(rgba(5,12,22,.06),rgba(5,12,22,.24));
+  pointer-events:none;
 }
 .project-meta{margin-top:14px;color:#ffb562;font-size:13px;font-weight:900}
 
@@ -447,6 +461,7 @@ a:focus-visible,.btn:focus-visible,button:focus-visible{
   font-weight:850;
 }
 .day.busy{background:#ffe5df;color:#b42318}
+.day.past{background:#f1f3f5;color:#475467}
 .day.muted{opacity:.25}
 .day.today{outline:2px solid var(--orange)}
 .day.is-free{cursor:pointer;transition:background .15s ease,transform .15s ease}

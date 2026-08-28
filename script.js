@@ -6,28 +6,46 @@ function monthNamesFor(){
   return monthNamesByLang[window.__lang === "en" ? "en" : "de"];
 }
 let booked = new Set();
+let availabilityState = "loading";
 let rangeStart = "";
 let rangeEnd = "";
 let view = new Date();
 view.setDate(1);
 
 async function loadAvailability(){
+  availabilityState = "loading";
+  renderCalendar();
   try{
-    const res = await fetch("/.netlify/functions/availability").catch(() => fetch("availability.json"));
+    const res = await fetch("/.netlify/functions/availability");
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    booked = new Set(data.booked || []);
+    if(!data || !Array.isArray(data.booked) || !data.booked.every(date => typeof date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(date))){
+      throw new Error("Invalid availability response");
+    }
+    booked = new Set(data.booked);
+    availabilityState = "ready";
   }catch(e){
     booked = new Set();
+    availabilityState = "error";
   }
   renderCalendar();
 }
 function isoDate(y,m,d){ return `${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`; }
-function renderCalendar(){
+function renderCalendar(focusKey = ""){
   const title = document.getElementById("monthTitle");
   const days = document.getElementById("calendarDays");
   const y = view.getFullYear(), m = view.getMonth();
   title.textContent = `${monthNamesFor()[m]} ${y}`;
   days.innerHTML = "";
+  if(availabilityState !== "ready"){
+    const english = window.__lang === "en";
+    title.textContent = availabilityState === "loading"
+      ? (english ? "Loading availability…" : "Verfügbarkeit wird geladen…")
+      : (english ? "Availability is currently unavailable" : "Verfügbarkeit ist derzeit nicht verfügbar");
+    days.setAttribute("aria-busy", availabilityState === "loading" ? "true" : "false");
+    return;
+  }
+  days.removeAttribute("aria-busy");
   const first = new Date(y,m,1);
   const startOffset = (first.getDay()+6)%7;
   const lastDay = new Date(y,m+1,0).getDate();
@@ -37,11 +55,19 @@ function renderCalendar(){
     days.appendChild(el);
   }
   const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const english = window.__lang === "en";
+  const locale = english ? "en-GB" : "de-CH";
   for(let d=1; d<=lastDay; d++){
     const key = isoDate(y,m,d);
     const isBusy = booked.has(key);
+    const date = new Date(y,m,d);
+    const isPast = date < today;
+    const isSelected = Boolean(rangeStart) && (!rangeEnd ? key === rangeStart : key >= rangeStart && key <= rangeEnd);
+    const fullDate = new Intl.DateTimeFormat(locale, { dateStyle: "full" }).format(date);
     const el=document.createElement("span");
-    el.className = "day" + (isBusy ? " busy" : " is-free");
+    el.className = "day" + (isPast ? " past" : (isBusy ? " busy" : " is-free"));
+    el.dataset.date = key;
     if(now.getFullYear()===y && now.getMonth()===m && now.getDate()===d) el.className += " today";
     if(!isBusy && rangeStart){
       if(key === rangeStart) el.className += " is-range-start";
@@ -49,15 +75,26 @@ function renderCalendar(){
       if(rangeEnd && key > rangeStart && key < rangeEnd) el.className += " is-in-range";
     }
     el.textContent=d;
-    if(!isBusy){
+    if(now.getFullYear()===y && now.getMonth()===m && now.getDate()===d) el.setAttribute("aria-current", "date");
+    if(!isBusy && !isPast){
       el.setAttribute("role","button");
       el.setAttribute("tabindex","0");
+      el.setAttribute("aria-pressed", isSelected ? "true" : "false");
+      el.setAttribute("aria-label", `${fullDate}, ${isSelected ? (english ? "selected" : "ausgewählt") : (english ? "available" : "verfügbar")}`);
       el.addEventListener("click", () => selectDay(key));
       el.addEventListener("keydown", (e) => {
         if(e.key === "Enter" || e.key === " "){ e.preventDefault(); selectDay(key); }
       });
+    } else {
+      el.setAttribute("role", "button");
+      el.setAttribute("aria-disabled", "true");
+      el.setAttribute("aria-label", `${fullDate}, ${isPast ? (english ? "past date" : "vergangener Termin") : (english ? "booked" : "ausgebucht")}`);
     }
     days.appendChild(el);
+  }
+  if(focusKey){
+    const target = days.querySelector(`[data-date="${focusKey}"]`);
+    if(target) target.focus();
   }
 }
 window.renderCalendar = renderCalendar;
@@ -65,9 +102,13 @@ window.renderCalendar = renderCalendar;
 // day. A single click selects one day; a second click on a later (or earlier)
 // day completes the range. The selection is mirrored into the contact form's
 // "Gewünschter Zeitraum" field so the visitor never has to type a date twice.
-function formatDE(iso){
+function formatDate(iso){
   const [y,m,d] = iso.split("-");
-  return `${d}.${m}.${y}`;
+  return new Intl.DateTimeFormat(window.__lang === "en" ? "en-GB" : "de-CH", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric"
+  }).format(new Date(Number(y), Number(m) - 1, Number(d)));
 }
 function selectDay(key){
   if(!rangeStart || (rangeStart && rangeEnd)){
@@ -85,7 +126,7 @@ function selectDay(key){
     rangeEnd = "";
   }
   syncRange();
-  renderCalendar();
+  renderCalendar(key);
 }
 function syncRange(){
   const input = document.querySelector('.contact-form input[name="termin"]');
@@ -96,17 +137,17 @@ function syncRange(){
 
   let value = "";
   if(rangeStart && rangeEnd && rangeEnd !== rangeStart){
-    value = `${formatDE(rangeStart)} – ${formatDE(rangeEnd)}`;
+    value = `${formatDate(rangeStart)} – ${formatDate(rangeEnd)}`;
   } else if(rangeStart){
-    value = formatDE(rangeStart);
+    value = formatDate(rangeStart);
   }
   if(input) input.value = value;
 
   const hasSelection = Boolean(rangeStart);
   if(summary) summary.hidden = !hasSelection;
   if(resetBtn) resetBtn.hidden = !hasSelection;
-  if(fromEl) fromEl.textContent = rangeStart ? formatDE(rangeStart) : "–";
-  if(toEl) toEl.textContent = rangeEnd ? formatDE(rangeEnd) : (rangeStart ? formatDE(rangeStart) : "–");
+  if(fromEl) fromEl.textContent = rangeStart ? formatDate(rangeStart) : "–";
+  if(toEl) toEl.textContent = rangeEnd ? formatDate(rangeEnd) : (rangeStart ? formatDate(rangeStart) : "–");
 }
 function clearRange(){
   rangeStart = "";
@@ -190,9 +231,12 @@ async function loadCompletedProjects(){
       if(firstImage && firstImage.url){
         const photo = document.createElement("div");
         photo.className = "project-photo";
-        photo.setAttribute("role", "img");
-        photo.setAttribute("aria-label", firstImage.alt || project.title || "Projektbild");
-        photo.style.backgroundImage = `linear-gradient(rgba(5,12,22,.06),rgba(5,12,22,.24)),url("${firstImage.url}")`;
+        const image = document.createElement("img");
+        image.src = firstImage.url;
+        image.alt = firstImage.alt || project.title || "Projektbild";
+        image.loading = "lazy";
+        image.decoding = "async";
+        photo.appendChild(image);
         article.appendChild(photo);
       }
 

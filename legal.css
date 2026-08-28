@@ -274,17 +274,6 @@ html body .site-footer .footer-contact-line span{
 }
 .legal-card p{ margin:0 0 4px; }
 
-/* Platzhalter – noch vom Inhaber zu ergänzende Angaben deutlich markieren */
-.legal-ph{
-  background:rgba(255,138,0,.16);
-  border-bottom:1px dashed rgba(184,90,0,.6);
-  border-radius:3px;
-  padding:0 4px;
-  color:#8a4300;
-  font-weight:700;
-  font-style:normal;
-}
-
 /* Zurück-Link */
 .legal-back{
   display:inline-flex;

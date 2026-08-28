@@ -1,28 +1,28 @@
 import { getDatabase } from "@netlify/database";
 import { getStore } from "@netlify/blobs";
-
-const CORS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "Content-Type, x-admin-password",
-  "Access-Control-Allow-Methods": "GET, POST, OPTIONS"
-};
-
-const MAX_PROJECT_IMAGE_BYTES = 6 * 1024 * 1024;
-const ALLOWED_TYPES = new Set(["image/png", "image/jpeg", "image/webp", "image/gif"]);
-
-function json(body, status = 200) {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { "Content-Type": "application/json", ...CORS }
-  });
-}
+import {
+  decodeImageDataUrl,
+  MAX_PROJECT_IMAGE_BYTES,
+  validateProjectImages
+} from "./_shared/images.js";
+import {
+  clearBlobCleanupIntents,
+  makeBlobCleanupDue,
+  queueBlobCleanupIntents,
+  scheduleBlobCleanup
+} from "./_shared/blob-cleanup.js";
+import { isPublishedProductionDeploy } from "./_shared/deploy-context.js";
+import { jsonResponse, responseHeaders, textResponse } from "./_shared/http.js";
 
 function projectStore() {
   return getStore({ name: "completed-projects", consistency: "strong" });
 }
 
 function getAdminPassword() {
-  const adminPassword = (process.env.ADMIN_PASSWORD || "").trim();
+  const value = typeof Netlify !== "undefined"
+    ? Netlify.env.get("ADMIN_PASSWORD")
+    : process.env.ADMIN_PASSWORD;
+  const adminPassword = (value || "").trim();
   return adminPassword || null;
 }
 
@@ -31,21 +31,6 @@ function isAuthorized(req) {
   if (!adminPassword) return false;
   const provided = (req.headers.get("x-admin-password") || "").trim();
   return provided === adminPassword;
-}
-
-function decodeDataUrl(dataUrl) {
-  if (typeof dataUrl !== "string") return null;
-  const match = /^data:([^;,]+)?(;base64)?,(.*)$/s.exec(dataUrl);
-  if (!match || !match[2]) return null;
-  const contentType = (match[1] || "application/octet-stream").toLowerCase();
-  let bytes;
-  try {
-    bytes = Buffer.from(match[3] || "", "base64");
-  } catch {
-    return null;
-  }
-  if (bytes.length > MAX_PROJECT_IMAGE_BYTES) return null;
-  return { contentType, bytes };
 }
 
 function toArrayBuffer(bytes) {
@@ -104,186 +89,451 @@ async function listProjects(db, includeInactive) {
   return projects;
 }
 
-async function insertImage(db, projectId, image, altText = "") {
-  const decoded = decodeDataUrl(image);
-  if (!decoded || !ALLOWED_TYPES.has(decoded.contentType)) {
-    throw new Error("Invalid image");
-  }
+async function insertImageInTransaction(db, client, store, storedKeys, projectId, decoded, altText = "") {
   const key = `project-${crypto.randomUUID()}`;
-  await projectStore().set(key, toArrayBuffer(decoded.bytes));
-  const [{ next }] = await db.sql`
-    SELECT COALESCE(MAX(sort_order), 0) + 1 AS next
-    FROM completed_project_images
-    WHERE project_id = ${projectId}`;
-  const rows = await db.sql`
-    INSERT INTO completed_project_images (project_id, blob_key, content_type, alt_text, sort_order)
-    VALUES (${projectId}, ${key}, ${decoded.contentType}, ${cleanText(altText, 300)}, ${next})
-    RETURNING id`;
-  return rows[0].id;
+  storedKeys.push(key);
+  await queueBlobCleanupIntents(
+    db.pool,
+    "completed-projects",
+    [key],
+    "new-image-pending",
+    5
+  );
+  await store.set(key, toArrayBuffer(decoded.bytes));
+  const nextResult = await client.query(
+    `SELECT COALESCE(MAX(sort_order), 0) + 1 AS next
+     FROM completed_project_images
+     WHERE project_id = $1`,
+    [projectId]
+  );
+  const insertResult = await client.query(
+    `INSERT INTO completed_project_images (project_id, blob_key, content_type, alt_text, sort_order)
+     VALUES ($1, $2, $3, $4, $5)
+     RETURNING id`,
+    [projectId, key, decoded.contentType, cleanText(altText, 300), nextResult.rows[0].next]
+  );
+  return { id: insertResult.rows[0].id, key };
 }
 
-function validateImages(images) {
-  for (const image of images) {
-    const decoded = decodeDataUrl(image);
-    if (!decoded || !ALLOWED_TYPES.has(decoded.contentType)) return false;
-  }
-  return true;
-}
-
-export default async function handler(req) {
-  if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
-
+export default async function handler(req, context) {
   const db = getDatabase();
   const url = new URL(req.url);
 
   if (req.method === "GET" && url.searchParams.has("image")) {
     const id = Number(url.searchParams.get("image"));
-    if (!Number.isInteger(id)) return json({ error: "Bad request" }, 400);
+    if (!Number.isInteger(id)) return jsonResponse({ error: "Bad request" }, 400);
     const rows = await db.sql`SELECT blob_key, asset_url, content_type FROM completed_project_images WHERE id = ${id}`;
-    if (!rows.length) return new Response("Not found", { status: 404, headers: CORS });
+    if (!rows.length) return textResponse("Not found", 404);
     if (!rows[0].blob_key && rows[0].asset_url) {
-      return new Response(null, { status: 302, headers: { Location: rows[0].asset_url, ...CORS } });
+      return new Response(null, {
+        status: 302,
+        headers: responseHeaders({ Location: rows[0].asset_url, "Cache-Control": "no-store" })
+      });
     }
     const blob = await projectStore().get(rows[0].blob_key, { type: "arrayBuffer" });
-    if (!blob) return new Response("Not found", { status: 404, headers: CORS });
+    if (!blob) return textResponse("Not found", 404);
     return new Response(blob, {
       status: 200,
-      headers: {
+      headers: responseHeaders({
         "Content-Type": rows[0].content_type || "image/jpeg",
-        "Cache-Control": "public, max-age=0, must-revalidate",
-        ...CORS
-      }
+        "Cache-Control": "public, max-age=0, must-revalidate"
+      })
     });
   }
 
   if (req.method === "GET") {
     const includeInactive = url.searchParams.get("all") === "1" && isAuthorized(req);
-    return json({ projects: await listProjects(db, includeInactive) });
+    return jsonResponse({ projects: await listProjects(db, includeInactive) });
   }
 
-  if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
-  if (!getAdminPassword()) return json({ error: "Admin password is not configured" }, 500);
-  if (!isAuthorized(req)) return json({ error: "Unauthorized" }, 401);
+  if (req.method !== "POST") return jsonResponse({ error: "Method not allowed" }, 405, { Allow: "GET, POST" });
+  if (!getAdminPassword()) return jsonResponse({ error: "Admin password is not configured" }, 500);
+  if (!isAuthorized(req)) return jsonResponse({ error: "Unauthorized" }, 401);
 
   const action = url.searchParams.get("action") || "";
+  if (!isPublishedProductionDeploy(context)) {
+    return jsonResponse(
+      { error: "Media management is disabled outside the published production deploy" },
+      403
+    );
+  }
+  const mutationResponse = body => {
+    scheduleBlobCleanup(context, db, "completed-projects", projectStore);
+    return jsonResponse(body);
+  };
   let body;
   try {
     body = await req.json();
   } catch {
-    return json({ error: "Bad request" }, 400);
+    return jsonResponse({ error: "Bad request" }, 400);
   }
 
   if (action === "create" || action === "update") {
     const title = cleanText(body.title, 200);
-    if (!title) return json({ error: "Title required" }, 400);
+    if (!title) return jsonResponse({ error: "Title required" }, 400);
     const values = {
       title,
       summary: cleanText(body.summary),
       description: cleanText(body.description),
       date: cleanText(body.date, 120) || null,
       location: cleanText(body.location, 200) || null,
-      customer: cleanText(body.customer, 200) || null,
-      active: body.active !== false
+      customer: cleanText(body.customer, 200) || null
     };
 
     let id = Number(body.id);
     const images = Array.isArray(body.images) ? body.images : [];
     if (action === "create" && !images.length) {
-      return json({ error: "At least one image required" }, 400);
+      return jsonResponse({ error: "At least one image required" }, 400);
     }
-    if (!validateImages(images)) {
-      return json({ error: "Invalid image" }, 400);
-    }
-
-    if (action === "create") {
-      const [{ next }] = await db.sql`SELECT COALESCE(MAX(sort_order), 0) + 1 AS next FROM completed_projects`;
-      const rows = await db.sql`
-        INSERT INTO completed_projects (title, summary, description, project_date, location, customer, active, sort_order)
-        VALUES (${values.title}, ${values.summary}, ${values.description}, ${values.date}, ${values.location}, ${values.customer}, ${values.active}, ${next})
-        RETURNING id`;
-      id = rows[0].id;
-    } else {
-      if (!Number.isInteger(id)) return json({ error: "Bad request" }, 400);
-      const rows = await db.sql`
-        UPDATE completed_projects
-        SET title = ${values.title}, summary = ${values.summary}, description = ${values.description},
-            project_date = ${values.date}, location = ${values.location}, customer = ${values.customer}, active = ${values.active}
-        WHERE id = ${id}
-        RETURNING id`;
-      if (!rows.length) return json({ error: "Not found" }, 404);
+    const decodedImages = validateProjectImages(images);
+    if (!decodedImages) {
+      return jsonResponse({ error: "Invalid image or total image payload exceeds 4 MiB" }, 400);
     }
 
+    if (action === "update" && !Number.isInteger(id)) {
+      return jsonResponse({ error: "Bad request" }, 400);
+    }
+
+    const client = await db.pool.connect();
+    const store = projectStore();
+    const storedKeys = [];
     try {
-      for (const image of images) await insertImage(db, id, image, title);
-    } catch (error) {
-      if (action === "create" && Number.isInteger(id)) {
-        await db.sql`DELETE FROM completed_projects WHERE id = ${id}`;
+      await client.query("BEGIN");
+      if (action === "create") {
+        const active = body.active !== false;
+        // Keep append order deterministic when two create requests overlap.
+        await client.query("LOCK TABLE completed_projects IN SHARE ROW EXCLUSIVE MODE");
+        const nextResult = await client.query(
+          "SELECT COALESCE(MAX(sort_order), 0) + 1 AS next FROM completed_projects"
+        );
+        const result = await client.query(
+          `INSERT INTO completed_projects
+             (title, summary, description, project_date, location, customer, active, sort_order)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+           RETURNING id`,
+          [
+            values.title,
+            values.summary,
+            values.description,
+            values.date,
+            values.location,
+            values.customer,
+            active,
+            nextResult.rows[0].next
+          ]
+        );
+        id = result.rows[0].id;
+      } else {
+        const result = await client.query(
+          `UPDATE completed_projects
+           SET title = $1, summary = $2, description = $3,
+               project_date = $4, location = $5, customer = $6
+           WHERE id = $7
+           RETURNING id`,
+          [
+            values.title,
+            values.summary,
+            values.description,
+            values.date,
+            values.location,
+            values.customer,
+            id
+          ]
+        );
+        if (!result.rows.length) {
+          await client.query("ROLLBACK");
+          return jsonResponse({ error: "Not found" }, 404);
+        }
       }
+
+      for (const decoded of decodedImages) {
+        await insertImageInTransaction(db, client, store, storedKeys, id, decoded, title);
+      }
+      await clearBlobCleanupIntents(
+        client,
+        "completed-projects",
+        storedKeys,
+        "new-image-pending"
+      );
+      await client.query("COMMIT");
+    } catch (error) {
+      try {
+        await client.query("ROLLBACK");
+      } catch (rollbackError) {
+        console.error("Project transaction rollback failed", rollbackError);
+      }
+      try {
+        await makeBlobCleanupDue(db.pool, "completed-projects", storedKeys);
+      } catch (cleanupError) {
+        console.error("Could not accelerate project rollback cleanup", cleanupError);
+      }
+      scheduleBlobCleanup(context, db, "completed-projects", projectStore);
       throw error;
+    } finally {
+      client.release();
     }
-    return json({ ok: true, id });
+    return mutationResponse({ ok: true, id });
   }
 
   if (action === "add-image") {
     const id = Number(body.id);
-    if (!Number.isInteger(id)) return json({ error: "Bad request" }, 400);
-    const exists = await db.sql`SELECT id, title FROM completed_projects WHERE id = ${id}`;
-    if (!exists.length) return json({ error: "Not found" }, 404);
-    return json({ ok: true, imageId: await insertImage(db, id, body.image, body.altText || exists[0].title) });
+    const decoded = decodeImageDataUrl(body.image, MAX_PROJECT_IMAGE_BYTES);
+    if (!Number.isInteger(id) || !decoded) return jsonResponse({ error: "Invalid image" }, 400);
+    const client = await db.pool.connect();
+    const storedKeys = [];
+    let inserted;
+    try {
+      await client.query("BEGIN");
+      const project = await client.query(
+        "SELECT id, title FROM completed_projects WHERE id = $1 FOR UPDATE",
+        [id]
+      );
+      if (!project.rows.length) {
+        await client.query("ROLLBACK");
+        return jsonResponse({ error: "Not found" }, 404);
+      }
+      inserted = await insertImageInTransaction(
+        db,
+        client,
+        projectStore(),
+        storedKeys,
+        id,
+        decoded,
+        body.altText || project.rows[0].title
+      );
+      await clearBlobCleanupIntents(
+        client,
+        "completed-projects",
+        storedKeys,
+        "new-image-pending"
+      );
+      await client.query("COMMIT");
+    } catch (error) {
+      try {
+        await client.query("ROLLBACK");
+      } catch (rollbackError) {
+        console.error("Project image transaction rollback failed", rollbackError);
+      }
+      try {
+        await makeBlobCleanupDue(db.pool, "completed-projects", storedKeys);
+      } catch (cleanupError) {
+        console.error("Could not accelerate image rollback cleanup", cleanupError);
+      }
+      scheduleBlobCleanup(context, db, "completed-projects", projectStore);
+      throw error;
+    } finally {
+      client.release();
+    }
+    return mutationResponse({ ok: true, imageId: inserted.id });
   }
 
   if (action === "replace-image") {
     const imageId = Number(body.imageId);
-    const decoded = decodeDataUrl(body.image);
-    if (!Number.isInteger(imageId) || !decoded || !ALLOWED_TYPES.has(decoded.contentType)) {
-      return json({ error: "Invalid image" }, 400);
+    const decoded = decodeImageDataUrl(body.image, MAX_PROJECT_IMAGE_BYTES);
+    if (!Number.isInteger(imageId) || !decoded) {
+      return jsonResponse({ error: "Invalid image" }, 400);
     }
-    const rows = await db.sql`SELECT blob_key FROM completed_project_images WHERE id = ${imageId}`;
-    if (!rows.length) return json({ error: "Not found" }, 404);
-    const key = rows[0].blob_key || `project-${crypto.randomUUID()}`;
-    await projectStore().set(key, toArrayBuffer(decoded.bytes));
-    await db.sql`
-      UPDATE completed_project_images
-      SET blob_key = ${key}, asset_url = NULL, content_type = ${decoded.contentType}
-      WHERE id = ${imageId}`;
-    return json({ ok: true });
+    const client = await db.pool.connect();
+    const store = projectStore();
+    const newKey = `project-${crypto.randomUUID()}`;
+    let oldKey;
+    let blobMayExist = false;
+    try {
+      await client.query("BEGIN");
+      const owner = await client.query(
+        "SELECT project_id FROM completed_project_images WHERE id = $1",
+        [imageId]
+      );
+      if (!owner.rows.length) {
+        await client.query("ROLLBACK");
+        return jsonResponse({ error: "Not found" }, 404);
+      }
+      const projectId = owner.rows[0].project_id;
+      const project = await client.query(
+        "SELECT id FROM completed_projects WHERE id = $1 FOR UPDATE",
+        [projectId]
+      );
+      if (!project.rows.length) {
+        await client.query("ROLLBACK");
+        return jsonResponse({ error: "Not found" }, 404);
+      }
+      const current = await client.query(
+        "SELECT blob_key FROM completed_project_images WHERE id = $1 FOR UPDATE",
+        [imageId]
+      );
+      if (!current.rows.length) {
+        await client.query("ROLLBACK");
+        return jsonResponse({ error: "Not found" }, 404);
+      }
+      oldKey = current.rows[0].blob_key;
+      await queueBlobCleanupIntents(
+        db.pool,
+        "completed-projects",
+        [newKey],
+        "replace-image-pending",
+        5
+      );
+      await queueBlobCleanupIntents(
+        client,
+        "completed-projects",
+        oldKey ? [oldKey] : [],
+        "replace-image-old-blob"
+      );
+      blobMayExist = true;
+      await store.set(newKey, toArrayBuffer(decoded.bytes));
+      await client.query(
+        `UPDATE completed_project_images
+         SET blob_key = $1, asset_url = NULL, content_type = $2
+         WHERE id = $3`,
+        [newKey, decoded.contentType, imageId]
+      );
+      await clearBlobCleanupIntents(
+        client,
+        "completed-projects",
+        [newKey],
+        "replace-image-pending"
+      );
+      await client.query("COMMIT");
+    } catch (error) {
+      try {
+        await client.query("ROLLBACK");
+      } catch (rollbackError) {
+        console.error("Project image replacement rollback failed", rollbackError);
+      }
+      if (blobMayExist) {
+        try {
+          await makeBlobCleanupDue(db.pool, "completed-projects", [newKey]);
+        } catch (cleanupError) {
+          console.error("Could not accelerate replacement image cleanup", cleanupError);
+        }
+      }
+      scheduleBlobCleanup(context, db, "completed-projects", projectStore);
+      throw error;
+    } finally {
+      client.release();
+    }
+    return mutationResponse({ ok: true, cleanupPending: Boolean(oldKey) });
   }
 
   if (action === "delete-image") {
     const imageId = Number(body.imageId);
-    if (!Number.isInteger(imageId)) return json({ error: "Bad request" }, 400);
-    const rows = await db.sql`SELECT blob_key FROM completed_project_images WHERE id = ${imageId}`;
-    if (rows.length) {
-      if (rows[0].blob_key) await projectStore().delete(rows[0].blob_key);
-      await db.sql`DELETE FROM completed_project_images WHERE id = ${imageId}`;
+    if (!Number.isInteger(imageId)) return jsonResponse({ error: "Bad request" }, 400);
+    const client = await db.pool.connect();
+    let oldKey;
+    try {
+      await client.query("BEGIN");
+      const owner = await client.query(
+        "SELECT project_id FROM completed_project_images WHERE id = $1",
+        [imageId]
+      );
+      if (!owner.rows.length) {
+        await client.query("ROLLBACK");
+        return jsonResponse({ ok: true, cleanupPending: false });
+      }
+      const project = await client.query(
+        "SELECT id FROM completed_projects WHERE id = $1 FOR UPDATE",
+        [owner.rows[0].project_id]
+      );
+      if (!project.rows.length) {
+        await client.query("ROLLBACK");
+        return jsonResponse({ ok: true, cleanupPending: false });
+      }
+      const current = await client.query(
+        "SELECT blob_key FROM completed_project_images WHERE id = $1 FOR UPDATE",
+        [imageId]
+      );
+      if (!current.rows.length) {
+        await client.query("ROLLBACK");
+        return jsonResponse({ ok: true, cleanupPending: false });
+      }
+      oldKey = current.rows[0].blob_key;
+      await queueBlobCleanupIntents(
+        client,
+        "completed-projects",
+        oldKey ? [oldKey] : [],
+        "delete-image"
+      );
+      await client.query("DELETE FROM completed_project_images WHERE id = $1", [imageId]);
+      await client.query("COMMIT");
+    } catch (error) {
+      try {
+        await client.query("ROLLBACK");
+      } catch (rollbackError) {
+        console.error("Project image delete rollback failed", rollbackError);
+      }
+      throw error;
+    } finally {
+      client.release();
     }
-    return json({ ok: true });
+    return mutationResponse({ ok: true, cleanupPending: Boolean(oldKey) });
   }
 
   if (action === "delete") {
     const id = Number(body.id);
-    if (!Number.isInteger(id)) return json({ error: "Bad request" }, 400);
-    const images = await db.sql`SELECT blob_key FROM completed_project_images WHERE project_id = ${id}`;
-    for (const image of images) {
-      if (image.blob_key) await projectStore().delete(image.blob_key);
+    if (!Number.isInteger(id)) return jsonResponse({ error: "Bad request" }, 400);
+    const client = await db.pool.connect();
+    let keys = [];
+    try {
+      await client.query("BEGIN");
+      const project = await client.query(
+        "SELECT id FROM completed_projects WHERE id = $1 FOR UPDATE",
+        [id]
+      );
+      if (!project.rows.length) {
+        await client.query("ROLLBACK");
+        return jsonResponse({ ok: true, cleanupPending: false });
+      }
+      const images = await client.query(
+        `SELECT blob_key FROM completed_project_images
+         WHERE project_id = $1
+         ORDER BY id
+         FOR UPDATE`,
+        [id]
+      );
+      keys = images.rows.map(image => image.blob_key).filter(Boolean);
+      await queueBlobCleanupIntents(
+        client,
+        "completed-projects",
+        keys,
+        "delete-project"
+      );
+      await client.query("DELETE FROM completed_projects WHERE id = $1", [id]);
+      await client.query("COMMIT");
+    } catch (error) {
+      try {
+        await client.query("ROLLBACK");
+      } catch (rollbackError) {
+        console.error("Project delete rollback failed", rollbackError);
+      }
+      throw error;
+    } finally {
+      client.release();
     }
-    await db.sql`DELETE FROM completed_projects WHERE id = ${id}`;
-    return json({ ok: true });
+    return mutationResponse({ ok: true, cleanupPending: keys.length > 0 });
   }
 
   if (action === "toggle") {
     const id = Number(body.id);
-    if (!Number.isInteger(id)) return json({ error: "Bad request" }, 400);
+    if (!Number.isInteger(id)) return jsonResponse({ error: "Bad request" }, 400);
     const rows = await db.sql`UPDATE completed_projects SET active = NOT active WHERE id = ${id} RETURNING active`;
-    if (!rows.length) return json({ error: "Not found" }, 404);
-    return json({ ok: true, active: rows[0].active });
+    if (!rows.length) return jsonResponse({ error: "Not found" }, 404);
+    return mutationResponse({ ok: true, active: rows[0].active });
   }
 
   if (action === "reorder") {
-    const ids = (Array.isArray(body.order) ? body.order : []).map(Number).filter(Number.isInteger);
+    const ids = [...new Set(
+      (Array.isArray(body.order) ? body.order : []).map(Number).filter(Number.isInteger)
+    )];
     const client = await db.pool.connect();
     try {
       await client.query("BEGIN");
+      const lockIds = [...ids].sort((a, b) => a - b);
+      if (lockIds.length) {
+        await client.query(
+          "SELECT id FROM completed_projects WHERE id = ANY($1::int[]) ORDER BY id FOR UPDATE",
+          [lockIds]
+        );
+      }
       for (let i = 0; i < ids.length; i++) {
         await client.query("UPDATE completed_projects SET sort_order = $1 WHERE id = $2", [i + 1, ids[i]]);
       }
@@ -294,8 +544,8 @@ export default async function handler(req) {
     } finally {
       client.release();
     }
-    return json({ ok: true });
+    return mutationResponse({ ok: true });
   }
 
-  return json({ error: "Unknown action" }, 400);
+  return jsonResponse({ error: "Unknown action" }, 400);
 }
