@@ -1,27 +1,12 @@
 import { getDatabase } from "@netlify/database";
-
-// CORS so both the public site and the admin panel can call this function.
-const CORS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "Content-Type, x-admin-password",
-  "Access-Control-Allow-Methods": "GET, POST, OPTIONS"
-};
-
-function json(body, status = 200) {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { "Content-Type": "application/json", ...CORS }
-  });
-}
-
-function cleanBooked(input) {
-  return (Array.isArray(input) ? input : [])
-    .filter(d => typeof d === "string" && /^\d{4}-\d{2}-\d{2}$/.test(d))
-    .sort();
-}
+import { bookedSetsEqual, cleanBooked, parseBookedInput } from "./_shared/availability.js";
+import { jsonResponse } from "./_shared/http.js";
 
 function getAdminPassword() {
-  const adminPassword = (process.env.ADMIN_PASSWORD || "").trim();
+  const value = typeof Netlify !== "undefined"
+    ? Netlify.env.get("ADMIN_PASSWORD")
+    : process.env.ADMIN_PASSWORD;
+  const adminPassword = (value || "").trim();
   return adminPassword || null;
 }
 
@@ -33,45 +18,58 @@ function isAuthorized(req) {
 }
 
 export default async function handler(req) {
-  if (req.method === "OPTIONS") {
-    return new Response("", { status: 204, headers: CORS });
-  }
-
   const db = getDatabase();
 
   // Read the current availability from the database — the single, shared
   // source of truth, identical for every visitor and every device.
   if (req.method === "GET") {
     const rows = await db.sql`SELECT booked_date FROM availability ORDER BY booked_date`;
-    return json({ booked: cleanBooked(rows.map(r => r.booked_date)) });
+    return jsonResponse({ booked: cleanBooked(rows.map(r => r.booked_date)) });
   }
 
   if (req.method === "POST") {
     if (!getAdminPassword()) {
-      return json({ error: "Admin password is not configured" }, 500);
+      return jsonResponse({ error: "Admin password is not configured" }, 500);
     }
     if (!isAuthorized(req)) {
-      return json({ error: "Unauthorized" }, 401);
+      return jsonResponse({ error: "Unauthorized" }, 401);
     }
 
     // Login can verify the password without writing any data.
     if (new URL(req.url).searchParams.get("verify") === "1") {
-      return json({ ok: true });
+      return jsonResponse({ ok: true });
     }
 
     let body;
     try {
       body = await req.json();
     } catch {
-      return json({ error: "Bad request" }, 400);
+      return jsonResponse({ error: "Bad request" }, 400);
     }
-    const booked = cleanBooked(body && body.booked);
+    const booked = parseBookedInput(body && body.booked);
+    const baseBooked = parseBookedInput(body && body.baseBooked);
+    if (!booked || !baseBooked) {
+      return jsonResponse({ error: "booked and baseBooked must contain valid ISO dates" }, 400);
+    }
 
-    // Replace the whole set inside a transaction so the saved state always
-    // matches exactly what the admin submitted, with no partial writes.
+    // The admin edits a complete snapshot. Lock and compare its original
+    // snapshot before replacing anything so a stale tab cannot overwrite a
+    // newer schedule written by another admin session.
     const client = await db.pool.connect();
     try {
       await client.query("BEGIN");
+      await client.query("LOCK TABLE availability IN EXCLUSIVE MODE");
+      const currentRows = await client.query(
+        "SELECT booked_date FROM availability ORDER BY booked_date"
+      );
+      const currentBooked = cleanBooked(currentRows.rows.map(row => row.booked_date));
+      if (!bookedSetsEqual(currentBooked, baseBooked)) {
+        await client.query("ROLLBACK");
+        return jsonResponse({
+          error: "Availability changed since it was loaded",
+          booked: currentBooked
+        }, 409);
+      }
       await client.query("DELETE FROM availability");
       if (booked.length) {
         const placeholders = booked.map((_, i) => `($${i + 1})`).join(",");
@@ -88,8 +86,8 @@ export default async function handler(req) {
       client.release();
     }
 
-    return json({ booked });
+    return jsonResponse({ booked });
   }
 
-  return json({ error: "Method not allowed" }, 405);
+  return jsonResponse({ error: "Method not allowed" }, 405, { Allow: "GET, POST" });
 }
